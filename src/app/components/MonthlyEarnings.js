@@ -1,6 +1,7 @@
 'use client';
 import React, { useMemo } from 'react';
 import { DISTURBED_MEAL_PAY, LUNCH_ALLOWANCE_PAY, EVENING_MEAL_ALLOWANCE_PAY } from '../lib/constants';
+import { Coffee } from 'lucide-react';
 
 const MonthlyEarnings = ({ currentDate, entries }) => {
     const totals = useMemo(() => {
@@ -36,10 +37,19 @@ const MonthlyEarnings = ({ currentDate, entries }) => {
                 <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-gray-300">Evening Meal Allowances:</span><span className="font-mono text-gray-900 dark:text-gray-100 font-semibold">£{totals.eveningTotal.toFixed(2)}</span></div>
                 <div className="flex justify-between items-center border-t border-gray-200 dark:border-gray-700/60 pt-3 mt-3"><span className="text-gray-900 dark:text-white font-bold text-base">Month Total:</span><span className="font-mono text-green-600 dark:text-green-400 font-bold text-lg">£{grandTotal.toFixed(2)}</span></div>
             </div>
-            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700/60">
-                <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700/60 text-center">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
                     All payment values are estimates, before tax and provide an estimation only.
                 </p>
+                <a 
+                    href="https://ko-fi.com/pvramid" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="inline-flex items-center space-x-2 px-4 py-2 text-sm font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors shadow-sm"
+                >
+                    <Coffee className="w-5 h-5 text-red-500" />
+                    <span>Support the Developer</span>
+                </a>
             </div>
         </div>
     );
