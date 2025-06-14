@@ -8,7 +8,8 @@ import EntriesSidebar from './components/EntriesSidebar';
 import WelcomeModal from './components/WelcomeModal';
 import EntryModal from './components/EntryModal';
 import SettingsModal from './components/SettingsModal';
-import MileageBreakdownModal from './components/MileageBreakdownModal'; // Import the new modal
+import MileageBreakdownModal from './components/MileageBreakdownModal';
+import FeedbackModal from './components/FeedbackModal'; // Import the new modal
 import Modal from './components/Modal';
 import ClientOnly from './components/ClientOnly';
 import { usePersistentState } from './hooks/usePersistentState';
@@ -21,11 +22,12 @@ export default function Home() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [isEntryModalOpen, setIsEntryModalOpen] = useState(false);
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-    const [isBreakdownModalOpen, setIsBreakdownModalOpen] = useState(false); // State for new modal
+    const [isBreakdownModalOpen, setIsBreakdownModalOpen] = useState(false);
+    const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false); // State for feedback modal
     
     const [entries, setEntries] = usePersistentState('ambulanceLogEntries_v6', {});
     const [editingEntry, setEditingEntry] = useState(null);
-    const [breakdownEntry, setBreakdownEntry] = useState(null); // State for entry to show in breakdown
+    const [breakdownEntry, setBreakdownEntry] = useState(null);
 
     const [settings, setSettings] = usePersistentState('ambulanceLogSettings_v5', {
         grade: '', band: '', step: '', station: '', userPostcode: ''
@@ -198,6 +200,50 @@ export default function Home() {
         setIsSettingsModalOpen(false);
     };
 
+    const handleSendFeedback = async ({ feedbackType, details, name, screenshot }) => {
+        const webhookUrl = 'https://discord.com/api/webhooks/1383407070425911336/HSB7813qTZy4SOPEP-0H2XfE6kzE3UQA5JwR17SRdjaDrHdJgk3MreI7KU83p2kNhKjB';
+        
+        const embed = {
+            title: `New Feedback: ${feedbackType}`,
+            description: details,
+            color: 5814783, // A nice blue color
+            fields: [],
+            timestamp: new Date().toISOString(),
+        };
+
+        if (name) {
+            embed.fields.push({ name: 'Submitted By', value: name, inline: true });
+        }
+        
+        const formData = new FormData();
+        formData.append('payload_json', JSON.stringify({ embeds: [embed] }));
+
+        if (screenshot) {
+            formData.append('file', screenshot);
+        }
+
+        const response = await fetch(webhookUrl, {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) {
+            throw new Error(`Webhook failed with status: ${response.status}`);
+        }
+
+        // If submission is successful, show the alert
+        if (window.Swal) {
+            window.Swal.fire({
+                title: 'Success!',
+                text: 'Your feedback has been sent.',
+                icon: 'success',
+                confirmButtonText: 'Great!',
+                background: theme === 'dark' ? '#1f2937' : '#ffffff',
+                color: theme === 'dark' ? '#f3f4f6' : '#111827'
+            });
+        }
+    };
+
     const handleExport = () => {
         const allEntries = Object.entries(entries).flatMap(([date, dayEntries]) =>
             dayEntries.map(entry => ({ ...entry, date }))
@@ -259,7 +305,15 @@ export default function Home() {
             <ClientOnly>
                 <div className="flex flex-col xl:flex-row max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
                     <div className="flex-grow xl:pr-8">
-                        <Header currentDate={currentDate} setCurrentDate={setCurrentDate} onExport={handleExport} onSettingsClick={() => setIsSettingsModalOpen(true)} theme={theme} setTheme={setTheme}/>
+                        <Header 
+                            currentDate={currentDate} 
+                            setCurrentDate={setCurrentDate} 
+                            onExport={handleExport} 
+                            onSettingsClick={() => setIsSettingsModalOpen(true)}
+                            onFeedbackClick={() => setIsFeedbackModalOpen(true)}
+                            theme={theme} 
+                            setTheme={setTheme}
+                        />
                         <div className="mt-4">
                            <Calendar currentDate={currentDate} onDateClick={handleOpenNewEntryModal} entries={entries} />
                         </div>
@@ -291,6 +345,12 @@ export default function Home() {
                     onClose={() => setIsSettingsModalOpen(false)}
                     onSave={handleSaveSettings}
                     currentSettings={settings}
+                />
+                
+                <FeedbackModal
+                    isOpen={isFeedbackModalOpen}
+                    onClose={() => setIsFeedbackModalOpen(false)}
+                    onSubmit={handleSendFeedback}
                 />
 
                 <MileageBreakdownModal 

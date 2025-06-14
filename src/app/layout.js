@@ -1,6 +1,7 @@
-// pvramid/ambulance-track/ambulance-track-1d0d37eaed18867f1ddff8bf2aff81949149a05b/src/app/layout.js
+// src/app/layout.js
 import "./globals.css";
 import { Inter } from "next/font/google";
+import Script from 'next/script';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -12,6 +13,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        <Script src="//cdn.jsdelivr.net/npm/sweetalert2@11" strategy="beforeInteractive"></Script>
+      </head>
       <body className={`${inter.className} bg-gray-50 dark:bg-gray-900 transition-colors duration-300`}>{children}</body>
     </html>
   );
