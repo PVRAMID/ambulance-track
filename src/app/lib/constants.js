@@ -1,4 +1,4 @@
-// pvramid/ambulance-track/ambulance-track-1d0d37eaed18867f1ddff8bf2aff81949149a05b/src/app/lib/constants.js
+// src/app/lib/constants.js
 export const MILEAGE_RATE = 0.45;
 export const DISTURBED_MEAL_PAY = 20;
 export const LUNCH_ALLOWANCE_PAY = 5;
@@ -21,16 +21,61 @@ export const PAY_BANDS = {
 
 export const GRADES = ['UCA', 'ECA', 'Technician', 'Paramedic', 'Specialist Paramedic'];
 
-export const STATIONS = [
-    { name: 'Coalville Ambulance Station', postcode: 'LE67 3PU' },
-    { name: 'Loughborough Ambulance Station', postcode: 'LE11 3GE' },
-    { name: 'Goodwood Ambulance Station', postcode: 'LE5 7LH' },
-    { name: 'Gorse Hill Ambulance Station', postcode: 'LE7 7GL' },
-    { name: 'Narborough Ambulance Station', postcode: 'LE19 3EQ' },
-    { name: 'Lutterworth Ambulance Station', postcode: 'LE17 4DZ' },
-    { name: 'Market Harborough Ambulance Station', postcode: 'LE16 9AA' },
-    { name: 'Hinckley Ambulance Station', postcode: 'LE10 3DA' }
-];
+export const DIVISIONS = ["Nottinghamshire", "Derbyshire", "Leicestershire", "Northamptonshire", "Lincolnshire"];
+
+export const DIVISIONS_AND_STATIONS = {
+    "Nottinghamshire": [
+        { name: 'Beechdale Ambulance Station', postcode: 'NG8 3LL' },
+        { name: 'Wilford Ambulance Station', postcode: 'NG11 7ESH' },
+        { name: 'Hucknall Ambulance Station', postcode: 'NG15 8AY' },
+        { name: 'Kingsmill (Mansfield) Ambulance Station', postcode: 'NG18 5HL' },
+        { name: 'Newark Ambulance Station', postcode: 'NG24 1LH' },
+        { name: 'Retford Ambulance Station', postcode: 'DN22 7XN' },
+        { name: 'Worksop Ambulance Station', postcode: 'S81 7BH' },
+        { name: 'Stapleford Ambulance Station', postcode: 'NG9 3LF' },
+        { name: 'HART Base – Mansfield', postcode: 'NG18 5BU' },
+    ],
+    "Derbyshire": [
+        { name: 'Chesterfield Ambulance Station', postcode: 'S42 7JT' },
+        { name: 'Heath Interchange Ambulance Station', postcode: 'S44 5SL' },
+        { name: 'Derby Ambulance Station (Willow Rd)', postcode: 'DE1 3NZ' },
+        { name: 'Ilkeston Ambulance Station', postcode: 'DE7 5FW' },
+        { name: 'Ripley Ambulance Station', postcode: 'DE5 3HN' },
+        { name: 'Buxton Ambulance Station', postcode: 'SK17 6SN' },
+        { name: 'Bakewell Ambulance Station', postcode: 'DE45 1AB' },
+        { name: 'Swadlincote Ambulance Station', postcode: 'DE11 0AE' },
+    ],
+    "Leicestershire": [
+        { name: 'Gorse Hill Ambulance Station', postcode: 'LE7 7GL' },
+        { name: 'Goodwood Ambulance Station', postcode: 'LE5 4LH' },
+        { name: 'Loughborough Ambulance Station', postcode: 'LE11 3GE' },
+        { name: 'Hinckley Ambulance Station', postcode: 'LE10 0QY' },
+        { name: 'Narborough Ambulance Station', postcode: 'LE19 3EQ' },
+        { name: 'Coalville Ambulance Station', postcode: 'LE67 3PU' },
+        { name: 'Lutterworth Ambulance Station', postcode: 'LE17 4DZ' },
+    ],
+    "Northamptonshire": [
+        { name: 'Northampton Mereway Ambulance Station', postcode: 'NN4 8BE' },
+        { name: 'Northampton North Ambulance Station', postcode: 'NN2 8DJ' },
+        { name: 'Kettering Ambulance Station', postcode: 'NN16 8UZ' },
+        { name: 'Corby Ambulance Station', postcode: 'NN17 1TR' },
+        { name: 'Towcester Ambulance Station', postcode: 'NN12 6HD' },
+        { name: 'Daventry Ambulance Station', postcode: 'NN11 4HN' },
+    ],
+    "Lincolnshire": [
+        { name: 'Lincoln Ambulance Station', postcode: 'LN5 8EL' },
+        { name: 'Sleaford Ambulance Station', postcode: 'NG34 7EN' },
+        { name: 'Boston Ambulance Station', postcode: 'PE21 9QS' },
+        { name: 'Grantham Ambulance Station', postcode: 'NG31 9DR' },
+        { name: 'Skegness Ambulance Station', postcode: 'PE25 2RH' },
+        { name: 'Horncastle Ambulance Station', postcode: 'LN9 6AW' },
+        { name: 'Mablethorpe Ambulance Station', postcode: 'LN12 1DP' },
+        { name: 'Louth Ambulance Station', postcode: 'LN11 7AS' },
+        { name: 'Grimsby Ambulance Station', postcode: 'DN31 2RL' },
+        { name: 'Scunthorpe Ambulance Station', postcode: 'DN15 6AL' },
+        { name: 'Spalding Ambulance Station', postcode: 'PE11 3DT' },
+    ]
+};
 
 export const UK_BANK_HOLIDAYS = [
     '2024-01-01', '2024-03-29', '2024-04-01', '2024-05-06', '2024-05-27', '2024-08-26', '2024-12-25', '2024-12-26',

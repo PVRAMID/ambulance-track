@@ -1,8 +1,8 @@
-// pvramid/ambulance-track/ambulance-track-1d0d37eaed18867f1ddff8bf2aff81949149a05b/src/app/components/EntryModal.js
+// src/app/components/EntryModal.js
 'use client';
 import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
-import { LUNCH_ALLOWANCE_PAY, EVENING_MEAL_ALLOWANCE_PAY, DISTURBED_MEAL_PAY, UK_BANK_HOLIDAYS, STATIONS } from '../lib/constants';
+import { LUNCH_ALLOWANCE_PAY, EVENING_MEAL_ALLOWANCE_PAY, DISTURBED_MEAL_PAY, UK_BANK_HOLIDAYS, DIVISIONS, DIVISIONS_AND_STATIONS } from '../lib/constants';
 import { X, Info, AlertTriangle } from 'lucide-react';
 
 const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingEntry, settings }) => {
@@ -19,7 +19,7 @@ const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingE
         const initialData = {
             claimType: '', callsign: '', incidentNumber: '', details: '', 
             overtimeHours: '0', overtimeMinutes: '0', isEnhancedRate: dayIsSunday || dayIsBankHoliday,
-            workingStation: '', mileage: '', mileagePay: 0,
+            workingDivision: '', workingStation: '', mileage: '', mileagePay: 0,
             ...existingEntry
         };
         
@@ -36,6 +36,11 @@ const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingE
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
+    
+    const handleDivisionChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({...prev, [name]: value, workingStation: ''}));
+    }
 
     const validate = () => {
         const newErrors = {};
@@ -44,9 +49,10 @@ const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingE
         if (['Late Finish', 'Disturbed Mealbreak'].includes(formData.claimType) && !formData.incidentNumber) newErrors.incidentNumber = "Incident number is required";
         
         if (formData.claimType === 'Mileage') {
+            if (!formData.workingDivision) newErrors.workingDivision = "Please select the division you worked in.";
             if (!formData.workingStation) newErrors.workingStation = "Please select your working station for the shift.";
             if (!settings.userPostcode) newErrors.userPostcode = "Your home postcode must be set in Settings.";
-            if (!settings.station) newErrors.baseStation = "Your base station must be set in Settings.";
+            if (!settings.station || !settings.division) newErrors.baseStation = "Your base division and station must be set in Settings.";
         }
         
         if (formData.claimType === 'Late Finish' && parseInt(formData.overtimeHours, 10) === 0 && parseInt(formData.overtimeMinutes, 10) === 0) {
@@ -117,13 +123,23 @@ const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingE
                 {formData.claimType === 'Mileage' && (
                     <div className="p-4 bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-500/30 rounded-lg space-y-4">
                         <p className="text-sm font-medium text-blue-800 dark:text-blue-200">Mileage Details</p>
-                        <div>
-                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1.5">Working Station for this shift*</label>
-                            <select name="workingStation" value={formData.workingStation} onChange={handleSelectChange} className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-900 dark:text-gray-100">
-                                <option value="">Select Station...</option>
-                                {STATIONS.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
-                            </select>
+                        <div className="grid grid-cols-2 gap-4">
+                             <div>
+                                <label className="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-1.5">Working Division*</label>
+                                <select name="workingDivision" value={formData.workingDivision || ''} onChange={handleDivisionChange} className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-900 dark:text-gray-100">
+                                    <option value="">Select Division...</option>
+                                    {DIVISIONS.map(d => <option key={d} value={d}>{d}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-1.5">Working Station*</label>
+                                <select name="workingStation" value={formData.workingStation || ''} onChange={handleSelectChange} disabled={!formData.workingDivision} className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-900 dark:text-gray-100 disabled:opacity-50">
+                                    <option value="">Select Station...</option>
+                                    {formData.workingDivision && DIVISIONS_AND_STATIONS[formData.workingDivision]?.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
+                                </select>
+                            </div>
                         </div>
+                        {errors.workingDivision && <p className="text-red-500 text-xs">{errors.workingDivision}</p>}
                         {errors.workingStation && <p className="text-red-500 text-xs">{errors.workingStation}</p>}
                         {errors.userPostcode && <p className="text-red-500 text-xs mt-1">{errors.userPostcode}</p>}
                         {errors.baseStation && <p className="text-red-500 text-xs mt-1">{errors.baseStation}</p>}

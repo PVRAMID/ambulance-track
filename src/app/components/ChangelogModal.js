@@ -6,6 +6,14 @@ import { X } from 'lucide-react';
 
 const changelogData = [
     {
+        version: "v0.2.0-beta",
+        date: "2025-06-14",
+        changes: [
+            { type: "feat", text: "Overhauled station selection to support multiple divisions (Nottinghamshire, Derbyshire, Leicestershire, Northamptonshire, Lincolnshire)." },
+            { type: "ui", text: "Station selection is now a two-step process using cascading dropdowns for Division and Station in both Settings and Mileage Claims." },
+        ]
+    },
+    {
         version: "v0.1.1-beta",
         date: "2025-06-14",
         changes: [

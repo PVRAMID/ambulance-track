@@ -11,12 +11,12 @@ import SettingsModal from './components/SettingsModal';
 import MileageBreakdownModal from './components/MileageBreakdownModal';
 import FeedbackModal from './components/FeedbackModal';
 import ChangelogModal from './components/ChangelogModal';
-import AboutModal from './components/AboutModal'; // Import AboutModal
+import AboutModal from './components/AboutModal';
 import Modal from './components/Modal';
 import ClientOnly from './components/ClientOnly';
 import Footer from './components/Footer';
 import { usePersistentState } from './hooks/usePersistentState';
-import { PAY_BANDS, OVERTIME_RATE_ENHANCED, OVERTIME_RATE_STANDARD, STATIONS, MILEAGE_RATE } from './lib/constants';
+import { PAY_BANDS, OVERTIME_RATE_ENHANCED, OVERTIME_RATE_STANDARD, DIVISIONS_AND_STATIONS, MILEAGE_RATE } from './lib/constants';
 import { getCoordsFromPostcode, getDistanceFromLatLonInMiles } from './lib/mileage';
 
 export default function Home() {
@@ -28,14 +28,14 @@ export default function Home() {
     const [isBreakdownModalOpen, setIsBreakdownModalOpen] = useState(false);
     const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
     const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
-    const [isAboutModalOpen, setIsAboutModalOpen] = useState(false); // State for about modal
+    const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
 
     const [entries, setEntries] = usePersistentState('ambulanceLogEntries_v6', {});
     const [editingEntry, setEditingEntry] = useState(null);
     const [breakdownEntry, setBreakdownEntry] = useState(null);
 
-    const [settings, setSettings] = usePersistentState('ambulanceLogSettings_v5', {
-        grade: '', band: '', step: '', station: '', userPostcode: ''
+    const [settings, setSettings] = usePersistentState('ambulanceLogSettings_v6', {
+        grade: '', band: '', step: '', division: '', station: '', userPostcode: ''
     });
     
     const [deleteRequest, setDeleteRequest] = useState(null);
@@ -113,7 +113,7 @@ export default function Home() {
                 }
 
                 try {
-                    const baseStationPostcode = STATIONS.find(s => s.name === settings.station)?.postcode;
+                    const baseStationPostcode = DIVISIONS_AND_STATIONS[settings.division]?.find(s => s.name === settings.station)?.postcode;
                     if (!baseStationPostcode) throw new Error('Your Base Station is not selected or invalid. Please check it in Settings.');
                     baseCoords = await getCoordsFromPostcode(baseStationPostcode);
                 } catch (e) {
@@ -121,7 +121,7 @@ export default function Home() {
                 }
 
                 try {
-                    const workingStationPostcode = STATIONS.find(s => s.name === finalData.workingStation)?.postcode;
+                    const workingStationPostcode = DIVISIONS_AND_STATIONS[finalData.workingDivision]?.find(s => s.name === finalData.workingStation)?.postcode;
                     if (!workingStationPostcode) throw new Error('The selected Working Station is invalid.');
                     workCoords = await getCoordsFromPostcode(workingStationPostcode);
                 } catch (e) {

@@ -1,8 +1,8 @@
-// pvramid/ambulance-track/ambulance-track-1d0d37eaed18867f1ddff8bf2aff81949149a05b/src/app/components/SettingsModal.js
+// src/app/components/SettingsModal.js
 'use client';
 import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
-import { GRADES, PAY_BANDS, STATIONS } from '../lib/constants';
+import { GRADES, PAY_BANDS, DIVISIONS, DIVISIONS_AND_STATIONS } from '../lib/constants';
 import { X } from 'lucide-react';
 
 const SettingsModal = ({ isOpen, onClose, onSave, currentSettings }) => {
@@ -27,6 +27,11 @@ const SettingsModal = ({ isOpen, onClose, onSave, currentSettings }) => {
         const { name, value } = e.target;
         setSettings(prev => ({ ...prev, [name]: value }));
     };
+
+    const handleDivisionChange = (e) => {
+        const { name, value } = e.target;
+        setSettings(prev => ({ ...prev, [name]: value, station: '' })); // Reset station when division changes
+    }
     
     const handleSave = (e) => { e.preventDefault(); onSave(settings); };
 
@@ -65,13 +70,24 @@ const SettingsModal = ({ isOpen, onClose, onSave, currentSettings }) => {
                     </div>
                 </div>
                 {settings.band && settings.step && <p className="text-xs text-gray-500 dark:text-gray-400 -mt-2">Hourly Rate: £{(PAY_BANDS[settings.band][settings.step]).toFixed(2)}</p>}
-                <div>
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1.5">Your Contractual Base Station</label>
-                    <select name="station" value={settings.station} onChange={handleSelectChange} className="w-full bg-gray-100 dark:bg-gray-700/60 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-gray-900 dark:text-gray-100">
-                        <option value="">Select Base Station...</option>
-                        {STATIONS.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
-                    </select>
+                
+                <div className="grid grid-cols-2 gap-4">
+                     <div>
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1.5">Your Division</label>
+                        <select name="division" value={settings.division || ''} onChange={handleDivisionChange} className="w-full bg-gray-100 dark:bg-gray-700/60 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-gray-900 dark:text-gray-100">
+                            <option value="">Select Division...</option>
+                            {DIVISIONS.map(d => <option key={d} value={d}>{d}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1.5">Your Base Station</label>
+                        <select name="station" value={settings.station || ''} onChange={handleSelectChange} disabled={!settings.division} className="w-full bg-gray-100 dark:bg-gray-700/60 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-gray-900 dark:text-gray-100 disabled:opacity-50">
+                            <option value="">Select Station...</option>
+                            {settings.division && DIVISIONS_AND_STATIONS[settings.division]?.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
+                        </select>
+                    </div>
                 </div>
+
                 <div className="flex items-center justify-end pt-4">
                     <button type="submit" className="px-6 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">Save Settings</button>
                 </div>
