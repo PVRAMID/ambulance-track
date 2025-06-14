@@ -6,6 +6,21 @@ import { X } from 'lucide-react';
 
 const changelogData = [
     {
+        version: "v0.3.1-beta",
+        date: "2025-06-14",
+        changes: [
+            { type: "fix", text: "Fixed an issue where the local storage warning would not appear correctly in private Browse windows." },
+        ]
+    },
+    {
+        version: "v0.3.0-beta",
+        date: "2025-06-14",
+        changes: [
+            { type: "feat", text: "Added a check to detect if local storage is inaccessible (e.g., in private Browse mode)." },
+            { type: "ui", text: "A persistent warning banner now appears if storage cannot be accessed, advising users that data will not be saved." }
+        ]
+    },
+    {
         version: "v0.2.1-beta",
         date: "2025-06-14",
         changes: [

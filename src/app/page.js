@@ -12,6 +12,7 @@ import MileageBreakdownModal from './components/MileageBreakdownModal';
 import FeedbackModal from './components/FeedbackModal';
 import ChangelogModal from './components/ChangelogModal';
 import AboutModal from './components/AboutModal';
+import StorageWarning from './components/StorageWarning'; // Import StorageWarning
 import Modal from './components/Modal';
 import ClientOnly from './components/ClientOnly';
 import Footer from './components/Footer';
@@ -29,6 +30,7 @@ export default function Home() {
     const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
     const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
     const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
+    const [showStorageWarning, setShowStorageWarning] = useState(false); // State for warning
 
     const [entries, setEntries] = usePersistentState('ambulanceLogEntries_v6', {});
     const [editingEntry, setEditingEntry] = useState(null);
@@ -51,6 +53,17 @@ export default function Home() {
             root.classList.remove('dark');
         }
     }, [theme]);
+
+    useEffect(() => {
+        // Check for Local Storage availability on client mount
+        try {
+            const testKey = 'actracker-storage-test';
+            window.localStorage.setItem(testKey, testKey);
+            window.localStorage.removeItem(testKey);
+        } catch (e) {
+            setShowStorageWarning(true);
+        }
+    }, []); // Empty dependency array ensures this runs only once
 
     // --- HANDLERS ---
     const handleOpenNewEntryModal = (day) => {
@@ -307,7 +320,8 @@ export default function Home() {
     
     return (
         <div className="flex flex-col min-h-screen">
-            <main className="flex-grow">
+            <StorageWarning isOpen={showStorageWarning} onClose={() => setShowStorageWarning(false)} />
+            <main className="flex-grow pt-16">
                 <ClientOnly>
                     <div className="flex flex-col xl:flex-row max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
                         <div className="flex-grow xl:pr-8">
