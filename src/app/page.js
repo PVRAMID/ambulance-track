@@ -9,9 +9,11 @@ import WelcomeModal from './components/WelcomeModal';
 import EntryModal from './components/EntryModal';
 import SettingsModal from './components/SettingsModal';
 import MileageBreakdownModal from './components/MileageBreakdownModal';
-import FeedbackModal from './components/FeedbackModal'; // Import the new modal
+import FeedbackModal from './components/FeedbackModal';
+import ChangelogModal from './components/ChangelogModal'; // Import ChangelogModal
 import Modal from './components/Modal';
 import ClientOnly from './components/ClientOnly';
+import Footer from './components/Footer'; // Import Footer
 import { usePersistentState } from './hooks/usePersistentState';
 import { PAY_BANDS, OVERTIME_RATE_ENHANCED, OVERTIME_RATE_STANDARD, STATIONS, MILEAGE_RATE } from './lib/constants';
 import { getCoordsFromPostcode, getDistanceFromLatLonInMiles } from './lib/mileage';
@@ -23,7 +25,8 @@ export default function Home() {
     const [isEntryModalOpen, setIsEntryModalOpen] = useState(false);
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [isBreakdownModalOpen, setIsBreakdownModalOpen] = useState(false);
-    const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false); // State for feedback modal
+    const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+    const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false); // State for changelog modal
     
     const [entries, setEntries] = usePersistentState('ambulanceLogEntries_v6', {});
     const [editingEntry, setEditingEntry] = useState(null);
@@ -301,75 +304,83 @@ export default function Home() {
     };
     
     return (
-        <main>
-            <ClientOnly>
-                <div className="flex flex-col xl:flex-row max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-                    <div className="flex-grow xl:pr-8">
-                        <Header 
-                            currentDate={currentDate} 
-                            setCurrentDate={setCurrentDate} 
-                            onExport={handleExport} 
-                            onSettingsClick={() => setIsSettingsModalOpen(true)}
-                            onFeedbackClick={() => setIsFeedbackModalOpen(true)}
-                            theme={theme} 
-                            setTheme={setTheme}
+        <div className="flex flex-col min-h-screen">
+            <main className="flex-grow">
+                <ClientOnly>
+                    <div className="flex flex-col xl:flex-row max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+                        <div className="flex-grow xl:pr-8">
+                            <Header 
+                                currentDate={currentDate} 
+                                setCurrentDate={setCurrentDate} 
+                                onExport={handleExport} 
+                                onSettingsClick={() => setIsSettingsModalOpen(true)}
+                                onFeedbackClick={() => setIsFeedbackModalOpen(true)}
+                                theme={theme} 
+                                setTheme={setTheme}
+                            />
+                            <div className="mt-4">
+                               <Calendar currentDate={currentDate} onDateClick={handleOpenNewEntryModal} entries={entries} />
+                            </div>
+                            <MonthlyEarnings currentDate={currentDate} entries={entries} />
+                        </div>
+                        <aside className="w-full xl:w-96 mt-8 xl:mt-0 xl:pl-8 xl:border-l border-gray-200 dark:border-gray-700/60">
+                             <div className="xl:sticky xl:top-8">
+                               <EntriesSidebar entries={entries} onEdit={handleOpenEditEntryModal} onShowBreakdown={handleOpenBreakdownModal} view={sidebarView} setView={setSidebarView} currentDate={currentDate} />
+                            </div>
+                        </aside>
+                    </div>
+                    
+                    <WelcomeModal isOpen={!hasSeenWelcome} onClose={() => setHasSeenWelcome(true)} />
+
+                    {isEntryModalOpen && selectedDate && (
+                        <EntryModal 
+                            isOpen={isEntryModalOpen} 
+                            onClose={handleCloseEntryModal} 
+                            onSave={handleSaveEntry}
+                            onDelete={handleDeleteRequest} 
+                            selectedDate={selectedDate} 
+                            existingEntry={editingEntry}
+                            settings={settings}
                         />
-                        <div className="mt-4">
-                           <Calendar currentDate={currentDate} onDateClick={handleOpenNewEntryModal} entries={entries} />
-                        </div>
-                        <MonthlyEarnings currentDate={currentDate} entries={entries} />
-                    </div>
-                    <aside className="w-full xl:w-96 mt-8 xl:mt-0 xl:pl-8 xl:border-l border-gray-200 dark:border-gray-700/60">
-                         <div className="xl:sticky xl:top-8">
-                           <EntriesSidebar entries={entries} onEdit={handleOpenEditEntryModal} onShowBreakdown={handleOpenBreakdownModal} view={sidebarView} setView={setSidebarView} currentDate={currentDate} />
-                        </div>
-                    </aside>
-                </div>
-                
-                <WelcomeModal isOpen={!hasSeenWelcome} onClose={() => setHasSeenWelcome(true)} />
+                    )}
 
-                {isEntryModalOpen && selectedDate && (
-                    <EntryModal 
-                        isOpen={isEntryModalOpen} 
-                        onClose={handleCloseEntryModal} 
-                        onSave={handleSaveEntry}
-                        onDelete={handleDeleteRequest} 
-                        selectedDate={selectedDate} 
-                        existingEntry={editingEntry}
-                        settings={settings}
+                    <SettingsModal 
+                        isOpen={isSettingsModalOpen} 
+                        onClose={() => setIsSettingsModalOpen(false)}
+                        onSave={handleSaveSettings}
+                        currentSettings={settings}
                     />
-                )}
+                    
+                    <FeedbackModal
+                        isOpen={isFeedbackModalOpen}
+                        onClose={() => setIsFeedbackModalOpen(false)}
+                        onSubmit={handleSendFeedback}
+                    />
 
-                <SettingsModal 
-                    isOpen={isSettingsModalOpen} 
-                    onClose={() => setIsSettingsModalOpen(false)}
-                    onSave={handleSaveSettings}
-                    currentSettings={settings}
-                />
-                
-                <FeedbackModal
-                    isOpen={isFeedbackModalOpen}
-                    onClose={() => setIsFeedbackModalOpen(false)}
-                    onSubmit={handleSendFeedback}
-                />
+                    <ChangelogModal 
+                        isOpen={isChangelogModalOpen}
+                        onClose={() => setIsChangelogModalOpen(false)}
+                    />
 
-                <MileageBreakdownModal 
-                    isOpen={isBreakdownModalOpen}
-                    onClose={handleCloseBreakdownModal}
-                    entry={breakdownEntry}
-                />
-                
-                <Modal isOpen={!!deleteRequest} onClose={() => setDeleteRequest(null)}>
-                    <div className="p-6">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Confirm Deletion</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 my-4">Are you sure you want to delete this entry? This action cannot be undone.</p>
-                        <div className="flex justify-end space-x-3">
-                            <button onClick={() => setDeleteRequest(null)} className="px-4 py-2 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">Cancel</button>
-                            <button onClick={confirmDelete} className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">Delete</button>
+                    <MileageBreakdownModal 
+                        isOpen={isBreakdownModalOpen}
+                        onClose={handleCloseBreakdownModal}
+                        entry={breakdownEntry}
+                    />
+                    
+                    <Modal isOpen={!!deleteRequest} onClose={() => setDeleteRequest(null)}>
+                        <div className="p-6">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Confirm Deletion</h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 my-4">Are you sure you want to delete this entry? This action cannot be undone.</p>
+                            <div className="flex justify-end space-x-3">
+                                <button onClick={() => setDeleteRequest(null)} className="px-4 py-2 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+                                <button onClick={confirmDelete} className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">Delete</button>
+                            </div>
                         </div>
-                    </div>
-                </Modal>
-            </ClientOnly>
-        </main>
+                    </Modal>
+                </ClientOnly>
+            </main>
+            <Footer onChangelogClick={() => setIsChangelogModalOpen(true)} />
+        </div>
     );
 }

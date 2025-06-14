@@ -12,11 +12,11 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className="h-full">
       <head>
         <Script src="//cdn.jsdelivr.net/npm/sweetalert2@11" strategy="beforeInteractive"></Script>
       </head>
-      <body className={`${inter.className} bg-gray-50 dark:bg-gray-900 transition-colors duration-300`}>{children}</body>
+      <body className={`${inter.className} bg-gray-50 dark:bg-gray-900 transition-colors duration-300 h-full flex flex-col`}>{children}</body>
     </html>
   );
 }
