@@ -6,6 +6,13 @@ import { X } from 'lucide-react';
 
 const changelogData = [
     {
+        version: "v0.1.1-beta",
+        date: "2025-06-14",
+        changes: [
+            { type: "feat", text: "Added a new 'About' section accessible from the footer with information about the developer and the project." },
+        ]
+    },
+    {
         version: "v0.1.0-beta",
         date: "2025-06-14",
         changes: [

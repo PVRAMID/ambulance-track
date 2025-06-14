@@ -10,10 +10,11 @@ import EntryModal from './components/EntryModal';
 import SettingsModal from './components/SettingsModal';
 import MileageBreakdownModal from './components/MileageBreakdownModal';
 import FeedbackModal from './components/FeedbackModal';
-import ChangelogModal from './components/ChangelogModal'; // Import ChangelogModal
+import ChangelogModal from './components/ChangelogModal';
+import AboutModal from './components/AboutModal'; // Import AboutModal
 import Modal from './components/Modal';
 import ClientOnly from './components/ClientOnly';
-import Footer from './components/Footer'; // Import Footer
+import Footer from './components/Footer';
 import { usePersistentState } from './hooks/usePersistentState';
 import { PAY_BANDS, OVERTIME_RATE_ENHANCED, OVERTIME_RATE_STANDARD, STATIONS, MILEAGE_RATE } from './lib/constants';
 import { getCoordsFromPostcode, getDistanceFromLatLonInMiles } from './lib/mileage';
@@ -26,8 +27,9 @@ export default function Home() {
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [isBreakdownModalOpen, setIsBreakdownModalOpen] = useState(false);
     const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
-    const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false); // State for changelog modal
-    
+    const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
+    const [isAboutModalOpen, setIsAboutModalOpen] = useState(false); // State for about modal
+
     const [entries, setEntries] = usePersistentState('ambulanceLogEntries_v6', {});
     const [editingEntry, setEditingEntry] = useState(null);
     const [breakdownEntry, setBreakdownEntry] = useState(null);
@@ -362,6 +364,11 @@ export default function Home() {
                         onClose={() => setIsChangelogModalOpen(false)}
                     />
 
+                    <AboutModal
+                        isOpen={isAboutModalOpen}
+                        onClose={() => setIsAboutModalOpen(false)}
+                    />
+
                     <MileageBreakdownModal 
                         isOpen={isBreakdownModalOpen}
                         onClose={handleCloseBreakdownModal}
@@ -380,7 +387,10 @@ export default function Home() {
                     </Modal>
                 </ClientOnly>
             </main>
-            <Footer onChangelogClick={() => setIsChangelogModalOpen(true)} />
+            <Footer 
+                onChangelogClick={() => setIsChangelogModalOpen(true)}
+                onAboutClick={() => setIsAboutModalOpen(true)}
+            />
         </div>
     );
 }
