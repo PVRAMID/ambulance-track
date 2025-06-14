@@ -2,7 +2,7 @@
 import React, { useMemo } from 'react';
 import { ICONS, Icon } from '../lib/constants';
 
-const EntriesSidebar = ({ entries, onEdit, view, setView, currentDate }) => {
+const EntriesSidebar = ({ entries, onEdit, onShowBreakdown, view, setView, currentDate }) => {
     const sortedEntries = useMemo(() => {
         const allEntries = Object.entries(entries)
             .flatMap(([date, dayEntries]) => dayEntries.map(entry => ({...entry, date})));
@@ -45,7 +45,12 @@ const EntriesSidebar = ({ entries, onEdit, view, setView, currentDate }) => {
                                      <p className="text-xs text-green-800 dark:text-green-400 mt-1.5 font-medium">Claim: {parseFloat(entry.mileage).toFixed(2)} miles (~£{entry.mileagePay?.toFixed(2)})</p>
                                 )}
                             </div>
-                            <button onClick={() => onEdit(entry, entry.date)} className="p-1.5 text-gray-400 hover:text-gray-800 dark:hover:text-white rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors"><Icon path={ICONS.Edit} className="w-4 h-4"/></button>
+                            <div className="flex items-center space-x-1">
+                                {entry.claimType === 'Mileage' && entry.calculationBreakdown && (
+                                     <button onClick={() => onShowBreakdown(entry)} className="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors"><Icon path={ICONS.Info} className="w-4 h-4"/></button>
+                                )}
+                                <button onClick={() => onEdit(entry, entry.date)} className="p-1.5 text-gray-400 hover:text-gray-800 dark:hover:text-white rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors"><Icon path={ICONS.Edit} className="w-4 h-4"/></button>
+                            </div>
                         </div>
                     </div>
                 )) : (<p className="text-gray-500 dark:text-gray-400 text-sm text-center py-10">No entries for this period.</p>)}

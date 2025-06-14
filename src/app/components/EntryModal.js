@@ -17,13 +17,13 @@ const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingE
         const initialData = {
             claimType: '', callsign: '', incidentNumber: '', details: '', 
             overtimeHours: '0', overtimeMinutes: '0', isEnhancedRate: dayIsSunday || dayIsBankHoliday,
-            manualMileage: false, mileage: '', destinationPostcode: '', baseStation: settings.station, mileagePay: 0,
+            workingStation: '', mileage: '', mileagePay: 0,
             ...existingEntry
         };
         
         setFormData(initialData);
         setErrors({});
-    }, [existingEntry, isOpen, selectedDate, settings]);
+    }, [existingEntry, isOpen, selectedDate]);
     
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -42,13 +42,9 @@ const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingE
         if (['Late Finish', 'Disturbed Mealbreak'].includes(formData.claimType) && !formData.incidentNumber) newErrors.incidentNumber = "Incident number is required";
         
         if (formData.claimType === 'Mileage') {
-            if (formData.manualMileage) {
-                if (!formData.mileage || parseFloat(formData.mileage) <= 0) newErrors.mileage = "Please enter valid mileage.";
-            } else {
-                if (!formData.destinationPostcode) newErrors.destinationPostcode = "Destination postcode is required.";
-                if (!settings.userPostcode) newErrors.userPostcode = "Your home postcode is not set in Settings.";
-                if (!formData.baseStation) newErrors.baseStation = "A base station is required for this journey.";
-            }
+            if (!formData.workingStation) newErrors.workingStation = "Please select your working station for the shift.";
+            if (!settings.userPostcode) newErrors.userPostcode = "Your home postcode must be set in Settings.";
+            if (!settings.station) newErrors.baseStation = "Your base station must be set in Settings.";
         }
         
         if (formData.claimType === 'Late Finish' && parseInt(formData.overtimeHours, 10) === 0 && parseInt(formData.overtimeMinutes, 10) === 0) {
@@ -63,10 +59,11 @@ const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingE
         e.preventDefault();
         if (!validate()) return;
         setIsCalculating(true);
+        setErrors({}); // Clear previous errors
         try {
             await onSave(formData);
         } catch (error) {
-            setErrors({ mileageCalc: error.message });
+            setErrors({ apiError: error.message || "Calculation failed. Please check postcodes." });
         } finally {
             setIsCalculating(false);
         }
@@ -85,10 +82,10 @@ const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingE
                     <select name="claimType" value={formData.claimType || ''} onChange={handleSelectChange} className="w-full bg-gray-100 dark:bg-gray-700/60 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">Select a type...</option>
                         <option value="Late Finish">Late Finish (Overtime)</option>
+                        <option value="Mileage">Mileage</option>
                         <option value="Lunch Allowance">Lunch Allowance</option>
                         <option value="Evening Meal Allowance">Evening Meal Allowance</option>
                         <option value="Disturbed Mealbreak">Disturbed Mealbreak</option>
-                        <option value="Mileage">Mileage</option>
                     </select>
                     {errors.claimType && <p className="text-red-500 text-xs mt-1">{errors.claimType}</p>}
                     {formData.claimType === 'Lunch Allowance' && (<div className="mt-2 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-500/30 rounded-lg text-red-800 dark:text-red-200 text-xs flex items-start space-x-2"><Icon path={ICONS.Info} className="w-4 h-4 mt-0.5 flex-shrink-0" /><span>More than five hours away from base, including the lunchtime period between 12:00pm to 2:00pm. Paid at £{LUNCH_ALLOWANCE_PAY.toFixed(2)}.</span></div>)}
@@ -118,33 +115,17 @@ const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingE
                 {formData.claimType === 'Mileage' && (
                     <div className="p-4 bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-500/30 rounded-lg space-y-4">
                         <p className="text-sm font-medium text-blue-800 dark:text-blue-200">Mileage Details</p>
-                        <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-500/30 rounded-lg text-yellow-800 dark:text-yellow-200 text-xs flex items-start space-x-2">
-                            <Icon path={ICONS.AlertTriangle} className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                            <span>This is a beta feature. The calculation provides an estimate based on straight-line distance and may not be entirely accurate.</span>
+                        <div>
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1.5">Working Station for this shift*</label>
+                            <select name="workingStation" value={formData.workingStation} onChange={handleSelectChange} className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-900 dark:text-gray-100">
+                                <option value="">Select Station...</option>
+                                {STATIONS.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
+                            </select>
                         </div>
-                         <div className="flex items-center space-x-3 pt-2">
-                            <input type="checkbox" name="manualMileage" id="manualMileage" checked={formData.manualMileage || false} onChange={handleChange} className="h-4 w-4 rounded bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-blue-600"/>
-                            <label htmlFor="manualMileage" className="text-sm text-gray-700 dark:text-gray-300">Enter Mileage Manually</label>
-                        </div>
-                        {formData.manualMileage ? (
-                            <div>
-                                <label className="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-1">Total Claimable Miles*</label>
-                                <input type="number" step="0.1" name="mileage" value={formData.mileage} onChange={handleChange} className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2"/>
-                            </div>
-                        ) : (
-                            <div className="space-y-3">
-                                <select name="baseStation" value={formData.baseStation} onChange={handleSelectChange} className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2">
-                                    <option value="">Select Base Station for this journey...</option>
-                                    {STATIONS.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
-                                </select>
-                                <input type="text" name="destinationPostcode" value={formData.destinationPostcode} onChange={handleChange} placeholder="Destination Postcode" className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2"/>
-                            </div>
-                        )}
-                        {errors.mileage && <p className="text-red-500 text-xs">{errors.mileage}</p>}
-                        {errors.destinationPostcode && <p className="text-red-500 text-xs">{errors.destinationPostcode}</p>}
-                        {errors.baseStation && <p className="text-red-500 text-xs">{errors.baseStation}</p>}
-                        {errors.userPostcode && <p className="text-red-500 text-xs mt-1 text-center">{errors.userPostcode}</p>}
-                        {errors.mileageCalc && <p className="text-red-500 text-xs mt-1 text-center">{errors.mileageCalc}</p>}
+                        {errors.workingStation && <p className="text-red-500 text-xs">{errors.workingStation}</p>}
+                        {errors.userPostcode && <p className="text-red-500 text-xs mt-1">{errors.userPostcode}</p>}
+                        {errors.baseStation && <p className="text-red-500 text-xs mt-1">{errors.baseStation}</p>}
+                        {errors.apiError && <p className="text-red-500 text-xs mt-1 text-center font-semibold">{errors.apiError}</p>}
                     </div>
                 )}
                 

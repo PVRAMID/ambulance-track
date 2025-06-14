@@ -8,6 +8,7 @@ import EntriesSidebar from './components/EntriesSidebar';
 import WelcomeModal from './components/WelcomeModal';
 import EntryModal from './components/EntryModal';
 import SettingsModal from './components/SettingsModal';
+import MileageBreakdownModal from './components/MileageBreakdownModal'; // Import the new modal
 import Modal from './components/Modal';
 import ClientOnly from './components/ClientOnly';
 import { usePersistentState } from './hooks/usePersistentState';
@@ -20,11 +21,13 @@ export default function Home() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [isEntryModalOpen, setIsEntryModalOpen] = useState(false);
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+    const [isBreakdownModalOpen, setIsBreakdownModalOpen] = useState(false); // State for new modal
     
-    const [entries, setEntries] = usePersistentState('ambulanceLogEntries_v4', {});
+    const [entries, setEntries] = usePersistentState('ambulanceLogEntries_v6', {});
     const [editingEntry, setEditingEntry] = useState(null);
+    const [breakdownEntry, setBreakdownEntry] = useState(null); // State for entry to show in breakdown
 
-    const [settings, setSettings] = usePersistentState('ambulanceLogSettings_v4', {
+    const [settings, setSettings] = usePersistentState('ambulanceLogSettings_v5', {
         grade: '', band: '', step: '', station: '', userPostcode: ''
     });
     
@@ -42,8 +45,7 @@ export default function Home() {
         }
     }, [theme]);
 
-
-    // --- HANDLERS (No changes needed here) ---
+    // --- HANDLERS ---
     const handleOpenNewEntryModal = (day) => {
         setSelectedDate(day);
         setEditingEntry(null);
@@ -60,6 +62,16 @@ export default function Home() {
         setIsEntryModalOpen(false);
         setSelectedDate(null);
         setEditingEntry(null);
+    };
+
+    const handleOpenBreakdownModal = (entry) => {
+        setBreakdownEntry(entry);
+        setIsBreakdownModalOpen(true);
+    };
+
+    const handleCloseBreakdownModal = () => {
+        setIsBreakdownModalOpen(false);
+        setBreakdownEntry(null);
     };
     
     const handleSaveEntry = async (entryData) => {
@@ -84,32 +96,55 @@ export default function Home() {
         
         // Mileage Calculation
         if (finalData.claimType === 'Mileage') {
-            if (finalData.manualMileage) {
-                const claimableMileage = parseFloat(finalData.mileage || 0);
-                finalData.mileagePay = claimableMileage * MILEAGE_RATE;
-            } else {
-                 try {
-                    const homeCoords = await getCoordsFromPostcode(settings.userPostcode);
-                    const destCoords = await getCoordsFromPostcode(finalData.destinationPostcode);
-                    const baseStationPostcode = STATIONS.find(s => s.name === finalData.baseStation)?.postcode;
-                    const baseCoords = await getCoordsFromPostcode(baseStationPostcode);
+            try {
+                let homeCoords, baseCoords, workCoords;
 
-                    if (homeCoords && destCoords && baseCoords) {
-                        const homeToDest = getDistanceFromLatLonInMiles(homeCoords.latitude, homeCoords.longitude, destCoords.latitude, destCoords.longitude);
-                        const homeToBase = getDistanceFromLatLonInMiles(homeCoords.latitude, homeCoords.longitude, baseCoords.latitude, baseCoords.longitude);
-                        
-                        const totalJourney = homeToDest * 2;
-                        const deduction = homeToBase * 2;
-                        const claimableMileage = Math.max(0, totalJourney - deduction);
-                        
-                        finalData.mileage = claimableMileage.toFixed(2);
-                        finalData.mileagePay = claimableMileage * MILEAGE_RATE;
-                    } else {
-                        throw new Error("Could not retrieve coordinates for one or more postcodes.");
-                    }
-                } catch (err) {
-                    throw err; // Re-throw to be caught by the calling function
+                try {
+                    homeCoords = await getCoordsFromPostcode(settings.userPostcode);
+                } catch (e) {
+                    throw new Error(`Your Home Postcode ('${settings.userPostcode}') could not be found. Please check it in Settings.`);
                 }
+
+                try {
+                    const baseStationPostcode = STATIONS.find(s => s.name === settings.station)?.postcode;
+                    if (!baseStationPostcode) throw new Error('Your Base Station is not selected or invalid. Please check it in Settings.');
+                    baseCoords = await getCoordsFromPostcode(baseStationPostcode);
+                } catch (e) {
+                    throw new Error(`Your Base Station's postcode could not be found. Please check your selection in Settings.`);
+                }
+
+                try {
+                    const workingStationPostcode = STATIONS.find(s => s.name === finalData.workingStation)?.postcode;
+                    if (!workingStationPostcode) throw new Error('The selected Working Station is invalid.');
+                    workCoords = await getCoordsFromPostcode(workingStationPostcode);
+                } catch (e) {
+                    throw new Error(`The Working Station's postcode could not be found.`);
+                }
+                
+                const homeToWork = getDistanceFromLatLonInMiles(homeCoords.latitude, homeCoords.longitude, workCoords.latitude, workCoords.longitude);
+                const homeToBase = getDistanceFromLatLonInMiles(homeCoords.latitude, homeCoords.longitude, baseCoords.latitude, baseCoords.longitude);
+                
+                const totalJourneyToWork = homeToWork * 2;
+                const usualJourneyToBase = homeToBase * 2;
+                
+                const claimableMileage = Math.max(0, totalJourneyToWork - usualJourneyToBase);
+                
+                finalData.mileage = claimableMileage.toFixed(2);
+                finalData.mileagePay = claimableMileage * MILEAGE_RATE;
+
+                // --- Store calculation for breakdown view ---
+                finalData.calculationBreakdown = {
+                    homeToWork: homeToWork.toFixed(2),
+                    homeToBase: homeToBase.toFixed(2),
+                    totalJourneyToWork: totalJourneyToWork.toFixed(2),
+                    usualJourneyToBase: usualJourneyToBase.toFixed(2),
+                    claimableMileage: claimableMileage.toFixed(2),
+                    mileageRate: MILEAGE_RATE,
+                    estimatedPay: (claimableMileage * MILEAGE_RATE).toFixed(2)
+                };
+
+            } catch (err) {
+                throw err;
             }
         }
         
@@ -174,7 +209,7 @@ export default function Home() {
         }
 
         const headers = [
-            "Date", "Claim Type", "Callsign", "Incident Number", "Mileage", "Mileage Pay Est",
+            "Date", "Claim Type", "Callsign", "Incident Number", "Working Station", "Mileage", "Mileage Pay Est",
             "Overtime Duration (mins)", "Overtime Pay Est", "Details"
         ];
         
@@ -195,6 +230,7 @@ export default function Home() {
                 entry.claimType || '',
                 entry.callsign || '',
                 entry.incidentNumber || '',
+                entry.workingStation || '',
                 entry.mileage || '',
                 entry.mileagePay ? entry.mileagePay.toFixed(2) : '0.00',
                 entry.overtimeDuration || 0,
@@ -231,7 +267,7 @@ export default function Home() {
                     </div>
                     <aside className="w-full xl:w-96 mt-8 xl:mt-0 xl:pl-8 xl:border-l border-gray-200 dark:border-gray-700/60">
                          <div className="xl:sticky xl:top-8">
-                           <EntriesSidebar entries={entries} onEdit={handleOpenEditEntryModal} view={sidebarView} setView={setSidebarView} currentDate={currentDate} />
+                           <EntriesSidebar entries={entries} onEdit={handleOpenEditEntryModal} onShowBreakdown={handleOpenBreakdownModal} view={sidebarView} setView={setSidebarView} currentDate={currentDate} />
                         </div>
                     </aside>
                 </div>
@@ -255,6 +291,12 @@ export default function Home() {
                     onClose={() => setIsSettingsModalOpen(false)}
                     onSave={handleSaveSettings}
                     currentSettings={settings}
+                />
+
+                <MileageBreakdownModal 
+                    isOpen={isBreakdownModalOpen}
+                    onClose={handleCloseBreakdownModal}
+                    entry={breakdownEntry}
                 />
                 
                 <Modal isOpen={!!deleteRequest} onClose={() => setDeleteRequest(null)}>

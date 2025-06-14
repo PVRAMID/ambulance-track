@@ -36,6 +36,11 @@ const MonthlyEarnings = ({ currentDate, entries }) => {
                 <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-gray-300">Evening Meal Allowances:</span><span className="font-mono text-gray-900 dark:text-gray-100 font-semibold">£{totals.eveningTotal.toFixed(2)}</span></div>
                 <div className="flex justify-between items-center border-t border-gray-200 dark:border-gray-700/60 pt-3 mt-3"><span className="text-gray-900 dark:text-white font-bold text-base">Month Total:</span><span className="font-mono text-green-600 dark:text-green-400 font-bold text-lg">£{grandTotal.toFixed(2)}</span></div>
             </div>
+            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700/60">
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                    All payment values are estimates, before tax and provide an estimation only.
+                </p>
+            </div>
         </div>
     );
 };

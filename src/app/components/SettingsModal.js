@@ -64,7 +64,7 @@ const SettingsModal = ({ isOpen, onClose, onSave, currentSettings }) => {
                 </div>
                 {settings.band && settings.step && <p className="text-xs text-gray-500 dark:text-gray-400 -mt-2">Hourly Rate: £{(PAY_BANDS[settings.band][settings.step]).toFixed(2)}</p>}
                 <div>
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1.5">Default Base Station</label>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1.5">Your Contractual Base Station</label>
                     <select name="station" value={settings.station} onChange={handleSelectChange} className="w-full bg-gray-100 dark:bg-gray-700/60 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-gray-900 dark:text-gray-100">
                         <option value="">Select Base Station...</option>
                         {STATIONS.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
