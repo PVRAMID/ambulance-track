@@ -6,6 +6,13 @@ import { X } from 'lucide-react';
 
 const changelogData = [
     {
+        version: "v0.4.0-beta",
+        date: "2025-06-14",
+        changes: [
+            { type: "feat", text: "Added anonymous analytics tracking for submission and deletion events to help improve the application." },
+        ]
+    },
+    {
         version: "v0.3.1-beta",
         date: "2025-06-14",
         changes: [

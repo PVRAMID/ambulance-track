@@ -12,13 +12,14 @@ import MileageBreakdownModal from './components/MileageBreakdownModal';
 import FeedbackModal from './components/FeedbackModal';
 import ChangelogModal from './components/ChangelogModal';
 import AboutModal from './components/AboutModal';
-import StorageWarning from './components/StorageWarning'; // Import StorageWarning
+import StorageWarning from './components/StorageWarning';
 import Modal from './components/Modal';
 import ClientOnly from './components/ClientOnly';
 import Footer from './components/Footer';
 import { usePersistentState } from './hooks/usePersistentState';
 import { PAY_BANDS, OVERTIME_RATE_ENHANCED, OVERTIME_RATE_STANDARD, DIVISIONS_AND_STATIONS, MILEAGE_RATE } from './lib/constants';
 import { getCoordsFromPostcode, getDistanceFromLatLonInMiles } from './lib/mileage';
+import { sendAnalyticsEvent } from './lib/analytics'; // Import the new analytics function
 
 export default function Home() {
     // --- STATE MANAGEMENT ---
@@ -30,7 +31,7 @@ export default function Home() {
     const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
     const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
     const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
-    const [showStorageWarning, setShowStorageWarning] = useState(false); // State for warning
+    const [showStorageWarning, setShowStorageWarning] = useState(false);
 
     const [entries, setEntries] = usePersistentState('ambulanceLogEntries_v6', {});
     const [editingEntry, setEditingEntry] = useState(null);
@@ -63,7 +64,7 @@ export default function Home() {
         } catch (e) {
             setShowStorageWarning(true);
         }
-    }, []); // Empty dependency array ensures this runs only once
+    }, []);
 
     // --- HANDLERS ---
     const handleOpenNewEntryModal = (day) => {
@@ -169,6 +170,7 @@ export default function Home() {
         }
         
         const dateString = selectedDate.toISOString().split('T')[0];
+        const eventType = editingEntry ? 'Update' : 'Creation';
         
         setEntries(prevEntries => {
             const newEntries = JSON.parse(JSON.stringify(prevEntries));
@@ -185,6 +187,8 @@ export default function Home() {
             newEntries[dateString] = dayEntries;
             return newEntries;
         });
+        
+        sendAnalyticsEvent(eventType, finalData);
         handleCloseEntryModal();
     };
 
@@ -195,6 +199,8 @@ export default function Home() {
     const confirmDelete = () => {
         if (!deleteRequest) return;
         const { entryId, dateString } = deleteRequest;
+        
+        const entryToDelete = entries[dateString]?.find(e => e.id === entryId);
 
         setEntries(prevEntries => {
             const newEntries = JSON.parse(JSON.stringify(prevEntries));
@@ -209,6 +215,11 @@ export default function Home() {
             
             return newEntries;
         });
+
+        if (entryToDelete) {
+            sendAnalyticsEvent('Deletion', entryToDelete);
+        }
+        
         setDeleteRequest(null);
         handleCloseEntryModal();
     };
