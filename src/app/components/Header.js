@@ -28,7 +28,7 @@ const Header = ({ currentDate, setCurrentDate, onExport, onSettingsClick, onFeed
                     className="flex items-center space-x-2 px-3 py-1.5 text-sm font-semibold bg-gray-100 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 rounded-full hover:bg-gray-200/80 dark:hover:bg-gray-700/80 transition-colors"
                 >
                     <MessageSquare className="w-4 h-4" />
-                    <span>Provide Feedback</span>
+                    <span>Feedback</span>
                 </button>
 
                 <div className="h-6 w-px bg-gray-200 dark:bg-gray-700"></div>
