@@ -1,6 +1,7 @@
+// pvramid/ambulance-track/ambulance-track-1d0d37eaed18867f1ddff8bf2aff81949149a05b/src/app/components/EntriesSidebar.js
 'use client';
 import React, { useMemo } from 'react';
-import { ICONS, Icon } from '../lib/constants';
+import { Clock, Info, Edit } from 'lucide-react';
 
 const EntriesSidebar = ({ entries, onEdit, onShowBreakdown, view, setView, currentDate }) => {
     const sortedEntries = useMemo(() => {
@@ -39,7 +40,7 @@ const EntriesSidebar = ({ entries, onEdit, onShowBreakdown, view, setView, curre
                                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{new Date(entry.date + 'T12:00:00').toLocaleDateString()}</p>
                                 <p className="text-sm text-gray-800 dark:text-gray-200 mt-2">Callsign: {entry.callsign}</p>
                                 {entry.claimType === 'Late Finish' && entry.overtimeDuration > 0 && (
-                                    <div className="text-xs text-yellow-800 dark:text-yellow-400 mt-1.5 flex items-center font-medium"><Icon path={ICONS.Clock} className="w-3.5 h-3.5 mr-1.5" /> {Math.floor(entry.overtimeDuration/60)}h {entry.overtimeDuration % 60}m (~£{entry.overtimePay?.toFixed(2)})</div>
+                                    <div className="text-xs text-yellow-800 dark:text-yellow-400 mt-1.5 flex items-center font-medium"><Clock className="w-3.5 h-3.5 mr-1.5" /> {Math.floor(entry.overtimeDuration/60)}h {entry.overtimeDuration % 60}m (~£{entry.overtimePay?.toFixed(2)})</div>
                                 )}
                                 {entry.claimType === 'Mileage' && (
                                      <p className="text-xs text-green-800 dark:text-green-400 mt-1.5 font-medium">Claim: {parseFloat(entry.mileage).toFixed(2)} miles (~£{entry.mileagePay?.toFixed(2)})</p>
@@ -47,9 +48,9 @@ const EntriesSidebar = ({ entries, onEdit, onShowBreakdown, view, setView, curre
                             </div>
                             <div className="flex items-center space-x-1">
                                 {entry.claimType === 'Mileage' && entry.calculationBreakdown && (
-                                     <button onClick={() => onShowBreakdown(entry)} className="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors"><Icon path={ICONS.Info} className="w-4 h-4"/></button>
+                                     <button onClick={() => onShowBreakdown(entry)} className="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors"><Info className="w-4 h-4"/></button>
                                 )}
-                                <button onClick={() => onEdit(entry, entry.date)} className="p-1.5 text-gray-400 hover:text-gray-800 dark:hover:text-white rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors"><Icon path={ICONS.Edit} className="w-4 h-4"/></button>
+                                <button onClick={() => onEdit(entry, entry.date)} className="p-1.5 text-gray-400 hover:text-gray-800 dark:hover:text-white rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors"><Edit className="w-4 h-4"/></button>
                             </div>
                         </div>
                     </div>

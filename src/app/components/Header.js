@@ -1,6 +1,7 @@
+// pvramid/ambulance-track/ambulance-track-1d0d37eaed18867f1ddff8bf2aff81949149a05b/src/app/components/Header.js
 'use client';
 import React from 'react';
-import { ICONS, Icon } from '../lib/constants';
+import { ChevronLeft, ChevronRight, Download, Settings, Sun, Moon } from 'lucide-react';
 
 const Header = ({ currentDate, setCurrentDate, onExport, onSettingsClick, theme, setTheme }) => {
     const changeMonth = (offset) => {
@@ -22,12 +23,12 @@ const Header = ({ currentDate, setCurrentDate, onExport, onSettingsClick, theme,
                 {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
             </h1>
             <div className="flex items-center space-x-2">
-                <button onClick={() => changeMonth(-1)} className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors"><Icon path={ICONS.ChevronLeft} className="w-6 h-6" /></button>
-                <button onClick={() => changeMonth(1)} className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors"><Icon path={ICONS.ChevronRight} className="w-6 h-6" /></button>
-                <button onClick={onExport} className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors"><Icon path={ICONS.Download} className="w-5 h-5" /></button>
-                <button onClick={onSettingsClick} className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors"><Icon path={ICONS.Settings} className="w-5 h-5" /></button>
+                <button onClick={() => changeMonth(-1)} className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors"><ChevronLeft className="w-6 h-6" /></button>
+                <button onClick={() => changeMonth(1)} className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors"><ChevronRight className="w-6 h-6" /></button>
+                <button onClick={onExport} className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors"><Download className="w-5 h-5" /></button>
+                <button onClick={onSettingsClick} className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors"><Settings className="w-5 h-5" /></button>
                 <button onClick={toggleTheme} className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors">
-                   {theme === 'dark' ? <Icon path={ICONS.Sun} className="w-5 h-5" /> : <Icon path={ICONS.Moon} className="w-5 h-5" />}
+                   {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                 </button>
             </div>
         </header>

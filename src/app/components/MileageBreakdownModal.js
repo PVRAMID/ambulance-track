@@ -1,7 +1,8 @@
+// pvramid/ambulance-track/ambulance-track-1d0d37eaed18867f1ddff8bf2aff81949149a05b/src/app/components/MileageBreakdownModal.js
 'use client';
 import React from 'react';
 import Modal from './Modal';
-import { ICONS, Icon } from '../lib/constants';
+import { X } from 'lucide-react';
 
 const BreakdownRow = ({ label, value, unit, bold = false }) => (
     <div className={`flex justify-between items-center py-2 ${bold ? 'font-bold' : ''}`}>
@@ -30,7 +31,7 @@ const MileageBreakdownModal = ({ isOpen, onClose, entry }) => {
             <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-bold text-gray-800 dark:text-white">Mileage Breakdown</h2>
-                    <button type="button" onClick={onClose} className="p-1 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors"><Icon path={ICONS.X} className="w-5 h-5" /></button>
+                    <button type="button" onClick={onClose} className="p-1 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors"><X className="w-5 h-5" /></button>
                 </div>
 
                 <div className="space-y-4 text-sm">

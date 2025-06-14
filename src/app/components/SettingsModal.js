@@ -1,7 +1,9 @@
+// pvramid/ambulance-track/ambulance-track-1d0d37eaed18867f1ddff8bf2aff81949149a05b/src/app/components/SettingsModal.js
 'use client';
 import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
-import { ICONS, Icon, GRADES, PAY_BANDS, STATIONS } from '../lib/constants';
+import { GRADES, PAY_BANDS, STATIONS } from '../lib/constants';
+import { X } from 'lucide-react';
 
 const SettingsModal = ({ isOpen, onClose, onSave, currentSettings }) => {
     const [settings, setSettings] = useState(currentSettings);
@@ -33,7 +35,7 @@ const SettingsModal = ({ isOpen, onClose, onSave, currentSettings }) => {
             <form onSubmit={handleSave} className="p-6 space-y-5">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-bold text-gray-800 dark:text-white">Settings</h2>
-                    <button type="button" onClick={onClose} className="p-1 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors"><Icon path={ICONS.X} className="w-5 h-5" /></button>
+                    <button type="button" onClick={onClose} className="p-1 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors"><X className="w-5 h-5" /></button>
                 </div>
                 <div>
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1.5">Your Home Postcode</label>

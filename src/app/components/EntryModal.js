@@ -1,7 +1,9 @@
+// pvramid/ambulance-track/ambulance-track-1d0d37eaed18867f1ddff8bf2aff81949149a05b/src/app/components/EntryModal.js
 'use client';
 import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
-import { ICONS, Icon, LUNCH_ALLOWANCE_PAY, EVENING_MEAL_ALLOWANCE_PAY, DISTURBED_MEAL_PAY, UK_BANK_HOLIDAYS, STATIONS } from '../lib/constants';
+import { LUNCH_ALLOWANCE_PAY, EVENING_MEAL_ALLOWANCE_PAY, DISTURBED_MEAL_PAY, UK_BANK_HOLIDAYS, STATIONS } from '../lib/constants';
+import { X, Info, AlertTriangle } from 'lucide-react';
 
 const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingEntry, settings }) => {
     const [formData, setFormData] = useState({});
@@ -74,7 +76,7 @@ const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingE
             <form onSubmit={handleSaveClick} className="p-6 space-y-4">
                  <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-bold text-gray-800 dark:text-white">{existingEntry ? "Edit Entry" : "Add Entry"} for {selectedDate?.toLocaleDateString()}</h2>
-                    <button type="button" onClick={onClose} className="p-1 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors"><Icon path={ICONS.X} className="w-5 h-5" /></button>
+                    <button type="button" onClick={onClose} className="p-1 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors"><X className="w-5 h-5" /></button>
                 </div>
                 
                 <div>
@@ -88,9 +90,9 @@ const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingE
                         <option value="Disturbed Mealbreak">Disturbed Mealbreak</option>
                     </select>
                     {errors.claimType && <p className="text-red-500 text-xs mt-1">{errors.claimType}</p>}
-                    {formData.claimType === 'Lunch Allowance' && (<div className="mt-2 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-500/30 rounded-lg text-red-800 dark:text-red-200 text-xs flex items-start space-x-2"><Icon path={ICONS.Info} className="w-4 h-4 mt-0.5 flex-shrink-0" /><span>More than five hours away from base, including the lunchtime period between 12:00pm to 2:00pm. Paid at £{LUNCH_ALLOWANCE_PAY.toFixed(2)}.</span></div>)}
-                    {formData.claimType === 'Evening Meal Allowance' && (<div className="mt-2 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-500/30 rounded-lg text-red-800 dark:text-red-200 text-xs flex items-start space-x-2"><Icon path={ICONS.Info} className="w-4 h-4 mt-0.5 flex-shrink-0" /><span>More than ten hours away from base and return after 7:00pm. Paid at £{EVENING_MEAL_ALLOWANCE_PAY.toFixed(2)}.</span></div>)}
-                    {formData.claimType === 'Disturbed Mealbreak' && (<div className="mt-2 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-500/30 rounded-lg text-red-800 dark:text-red-200 text-xs flex items-start space-x-2"><Icon path={ICONS.Info} className="w-4 h-4 mt-0.5 flex-shrink-0" /><span>Paid at £{DISTURBED_MEAL_PAY.toFixed(2)}.</span></div>)}
+                    {formData.claimType === 'Lunch Allowance' && (<div className="mt-2 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-500/30 rounded-lg text-red-800 dark:text-red-200 text-xs flex items-start space-x-2"><Info className="w-4 h-4 mt-0.5 flex-shrink-0" /><span>More than five hours away from base, including the lunchtime period between 12:00pm to 2:00pm. Paid at £{LUNCH_ALLOWANCE_PAY.toFixed(2)}.</span></div>)}
+                    {formData.claimType === 'Evening Meal Allowance' && (<div className="mt-2 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-500/30 rounded-lg text-red-800 dark:text-red-200 text-xs flex items-start space-x-2"><Info className="w-4 h-4 mt-0.5 flex-shrink-0" /><span>More than ten hours away from base and return after 7:00pm. Paid at £{EVENING_MEAL_ALLOWANCE_PAY.toFixed(2)}.</span></div>)}
+                    {formData.claimType === 'Disturbed Mealbreak' && (<div className="mt-2 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-500/30 rounded-lg text-red-800 dark:text-red-200 text-xs flex items-start space-x-2"><Info className="w-4 h-4 mt-0.5 flex-shrink-0" /><span>Paid at £{DISTURBED_MEAL_PAY.toFixed(2)}.</span></div>)}
                 </div>
 
                 {formData.claimType === 'Late Finish' && (
@@ -101,7 +103,7 @@ const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingE
                             <input type="number" name="overtimeMinutes" value={formData.overtimeMinutes || '0'} onChange={handleChange} min="0" max="59" className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-900 dark:text-gray-100"/>
                         </div>
                         <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-500/30 rounded-lg text-yellow-800 dark:text-yellow-200 text-xs flex items-start space-x-2">
-                            <Icon path={ICONS.AlertTriangle} className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                            <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                             <span>Overtime must be claimed to the exact minute as per recent policy changes.</span>
                         </div>
                         <div className="flex items-center space-x-3 pt-2">
