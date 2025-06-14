@@ -6,6 +6,13 @@ import { X } from 'lucide-react';
 
 const changelogData = [
     {
+        version: "v0.2.1-beta",
+        date: "2025-06-14",
+        changes: [
+            { type: "fix", text: "Resolved linting errors in the 'About' modal, replacing the standard `<img>` tag with `next/image` for better performance and fixing unescaped characters." },
+        ]
+    },
+    {
         version: "v0.2.0-beta",
         date: "2025-06-14",
         changes: [

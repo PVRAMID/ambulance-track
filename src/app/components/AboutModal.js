@@ -1,6 +1,7 @@
 // src/app/components/AboutModal.js
 'use client';
 import React from 'react';
+import Image from 'next/image';
 import Modal from './Modal';
 import { X, Coffee } from 'lucide-react';
 
@@ -14,9 +15,11 @@ const AboutModal = ({ isOpen, onClose }) => {
                 </div>
                 
                 <div className="text-center">
-                    <img 
+                    <Image 
                         src="https://storage.ko-fi.com/cdn/useruploads/e66b78e5-53e5-4960-a8c0-9e2cae593677_eea130-f380-44b9-a4f3-4f9a0ab42dd1.png" 
                         alt="Josh Lewis" 
+                        width={96}
+                        height={96}
                         className="w-24 h-24 rounded-full mx-auto shadow-md"
                     />
                 </div>
@@ -24,7 +27,7 @@ const AboutModal = ({ isOpen, onClose }) => {
                 <div className="space-y-6 text-sm text-gray-700 dark:text-gray-300 mt-4">
                     <div>
                         <h3 className="font-bold text-lg text-gray-800 dark:text-white mb-1">About Me</h3>
-                        <p>Josh Lewis, Technician based in Leicestershire Division. Constantly forgetting when I've had late meal breaks and forgetting to submit mileage claims, came up with a solution, something easy and non-complex without having to repurpose a random shift planner app on the app store. Decided to make something new.</p>
+                        <p>Josh Lewis, Technician based in Leicestershire Division. Constantly forgetting when I&apos;ve had late meal breaks and forgetting to submit mileage claims, came up with a solution, something easy and non-complex without having to repurpose a random shift planner app on the app store. Decided to make something new.</p>
                     </div>
 
                     <div>
@@ -34,7 +37,7 @@ const AboutModal = ({ isOpen, onClose }) => {
 
                     <div>
                         <h3 className="font-bold text-lg text-gray-800 dark:text-white mb-1">Pricing</h3>
-                        <p>This application is currently free to use during its beta phase. In the future, it may move to a small subscription model to support continued development and server costs. Your feedback on what you'd be willing to pay would be greatly appreciated!</p>
+                        <p>This application is currently free to use during its beta phase. In the future, it may move to a small subscription model to support continued development and server costs. Your feedback on what you&apos;d be willing to pay would be greatly appreciated!</p>
                     </div>
                 </div>
 
