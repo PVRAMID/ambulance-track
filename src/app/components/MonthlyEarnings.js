@@ -27,7 +27,7 @@ const MonthlyEarnings = ({ currentDate, entries }) => {
 
     return (
         <div className="mt-8 bg-white dark:bg-gray-800/40 border border-gray-200 dark:border-gray-700/60 rounded-xl p-6 shadow-lg">
-            <h3 className="font-bold text-lg text-gray-800 dark:text-white mb-4">Earnings for {currentDate.toLocaleString('default', { month: 'long' })}</h3>
+            <h3 className="font-bold text-lg text-gray-800 dark:text-white mb-4"><strong>Estimated</strong> Earnings for {currentDate.toLocaleString('default', { month: 'long' })}</h3>
             <div className="space-y-3 text-sm">
                 <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-gray-300">Total Overtime:</span><span className="font-mono text-gray-900 dark:text-gray-100 font-semibold">£{totals.overtimeTotal.toFixed(2)}</span></div>
                 <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-gray-300">Total Mileage:</span><span className="font-mono text-gray-900 dark:text-gray-100 font-semibold">£{totals.mileageTotal.toFixed(2)}</span></div>
