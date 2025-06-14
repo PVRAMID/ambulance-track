@@ -9,7 +9,7 @@ import WelcomeModal from './components/WelcomeModal';
 import EntryModal from './components/EntryModal';
 import SettingsModal from './components/SettingsModal';
 import Modal from './components/Modal';
-import ClientOnly from './components/ClientOnly'; // <-- Import the new component
+import ClientOnly from './components/ClientOnly';
 import { usePersistentState } from './hooks/usePersistentState';
 import { PAY_BANDS, OVERTIME_RATE_ENHANCED, OVERTIME_RATE_STANDARD, STATIONS, MILEAGE_RATE } from './lib/constants';
 import { getCoordsFromPostcode, getDistanceFromLatLonInMiles } from './lib/mileage';
@@ -220,15 +220,19 @@ export default function Home() {
     
     return (
         <main>
-            <ClientOnly> {/* <-- WRAPPER START */}
-                <div className="flex flex-col md:flex-row max-w-7xl mx-auto p-4 sm:p-6">
-                    <div className="flex-grow md:pr-6">
+            <ClientOnly>
+                <div className="flex flex-col xl:flex-row max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+                    <div className="flex-grow xl:pr-8">
                         <Header currentDate={currentDate} setCurrentDate={setCurrentDate} onExport={handleExport} onSettingsClick={() => setIsSettingsModalOpen(true)} theme={theme} setTheme={setTheme}/>
-                        <Calendar currentDate={currentDate} onDateClick={handleOpenNewEntryModal} entries={entries} />
+                        <div className="mt-4">
+                           <Calendar currentDate={currentDate} onDateClick={handleOpenNewEntryModal} entries={entries} />
+                        </div>
                         <MonthlyEarnings currentDate={currentDate} entries={entries} />
                     </div>
-                    <aside className="w-full md:w-1/3 lg:w-1/4 mt-8 md:mt-0 md:pl-6 md:border-l border-gray-200 dark:border-gray-700">
-                        <EntriesSidebar entries={entries} onEdit={handleOpenEditEntryModal} view={sidebarView} setView={setSidebarView} currentDate={currentDate} />
+                    <aside className="w-full xl:w-96 mt-8 xl:mt-0 xl:pl-8 xl:border-l border-gray-200 dark:border-gray-700/60">
+                         <div className="xl:sticky xl:top-8">
+                           <EntriesSidebar entries={entries} onEdit={handleOpenEditEntryModal} view={sidebarView} setView={setSidebarView} currentDate={currentDate} />
+                        </div>
                     </aside>
                 </div>
                 
@@ -263,7 +267,7 @@ export default function Home() {
                         </div>
                     </div>
                 </Modal>
-            </ClientOnly> {/* <-- WRAPPER END */}
+            </ClientOnly>
         </main>
     );
 }
