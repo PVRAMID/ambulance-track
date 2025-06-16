@@ -6,12 +6,21 @@ import { X } from 'lucide-react';
 
 const changelogData = [
     {
+        version: "v0.6.0-beta",
+        date: "2025-06-16",
+        changes: [
+            { type: "backend", text: "Refactored the main page logic into smaller, reusable components for better code organization and maintainability." },
+            { type: "backend", text: "Extracted calculation logic into a dedicated utility file." },
+            { type: "ui", text: "Added new tag types ('Backend', 'Server', 'Suggested Feature') to the changelog for better categorization." }
+        ]
+    },
+    {
         version: "v0.5.0-beta",
         date: "2025-06-16",
         changes: [
             { type: "feat", text: "Added a unique user ID to improve analytics and support. The ID is now visible in the 'About' modal." },
             { type: "feat", text: "Implemented a notification system to alert users when a new version of the application is available." },
-            { type: "feat", text: "The update notification can now be toggled on or off via a configuration setting in the code." },
+            { type: "backend", text: "The update notification can now be toggled on or off via a configuration setting in the code." },
         ]
     },
     {
@@ -95,13 +104,19 @@ const Tag = ({ type }) => {
         feat: "bg-blue-100 dark:bg-blue-900/60 text-blue-800 dark:text-blue-300",
         ui: "bg-green-100 dark:bg-green-900/60 text-green-800 dark:text-green-300",
         fix: "bg-red-100 dark:bg-red-900/60 text-red-800 dark:text-red-300",
+        backend: "bg-purple-100 dark:bg-purple-900/60 text-purple-800 dark:text-purple-300",
+        server: "bg-gray-200 dark:bg-gray-700/60 text-gray-800 dark:text-gray-300",
+        suggested: "bg-yellow-100 dark:bg-yellow-900/60 text-yellow-800 dark:text-yellow-300",
     };
     const text = {
         feat: "Feature",
         ui: "UI",
-        fix: "Fix"
+        fix: "Fix",
+        backend: "Backend",
+        server: "Server",
+        suggested: "Suggested Feature"
     }
-    return <span className={`px-2 py-0.5 rounded-md text-xs font-semibold ${styles[type]}`}>{text[type]}</span>
+    return <span className={`px-2 py-0.5 rounded-md text-xs font-semibold ${styles[type] || styles.fix}`}>{text[type] || "Update"}</span>
 }
 
 const ChangelogModal = ({ isOpen, onClose }) => {
@@ -113,7 +128,7 @@ const ChangelogModal = ({ isOpen, onClose }) => {
                     <button type="button" onClick={onClose} className="p-1 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors"><X className="w-5 h-5" /></button>
                 </div>
 
-                <div className="space-y-8">
+                <div className="space-y-8 max-h-[70vh] overflow-y-auto pr-2">
                     {changelogData.map(log => (
                         <div key={log.version}>
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{log.version}</h3>

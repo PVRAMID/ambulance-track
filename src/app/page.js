@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Header from './components/Header';
 import Calendar from './components/Calendar';
 import MonthlyEarnings from './components/MonthlyEarnings';
@@ -17,238 +17,30 @@ import UpdateNotification from './components/UpdateNotification';
 import Modal from './components/Modal';
 import ClientOnly from './components/ClientOnly';
 import Footer from './components/Footer';
-import { usePersistentState } from './hooks/usePersistentState';
-import { APP_VERSION, ENABLE_UPDATE_NOTIFICATION, PAY_BANDS, OVERTIME_RATE_ENHANCED, OVERTIME_RATE_STANDARD, DIVISIONS_AND_STATIONS, MILEAGE_RATE } from './lib/constants';
-import { getCoordsFromPostcode, getDistanceFromLatLonInMiles } from './lib/mileage';
-import { sendAnalyticsEvent } from './lib/analytics';
+import { useAppLogic } from './hooks/useAppLogic'; // Import the new master hook
+import { sendAnalyticsEvent } from './lib/analytics'; // Keep for feedback
 
 export default function Home() {
-    // --- STATE MANAGEMENT ---
-    const [currentDate, setCurrentDate] = useState(new Date());
-    const [selectedDate, setSelectedDate] = useState(null);
-    const [isEntryModalOpen, setIsEntryModalOpen] = useState(false);
-    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-    const [isBreakdownModalOpen, setIsBreakdownModalOpen] = useState(false);
-    const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
-    const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
-    const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
-    const [showStorageWarning, setShowStorageWarning] = useState(false);
-    const [showUpdateNotification, setShowUpdateNotification] = useState(false);
-
-    const [userId] = usePersistentState('actracker_userId', crypto.randomUUID());
-    const [lastSeenVersion, setLastSeenVersion] = usePersistentState('actracker_lastSeenVersion', '0.0.0');
-    
-    const [entries, setEntries] = usePersistentState('ambulanceLogEntries_v6', {});
-    const [editingEntry, setEditingEntry] = useState(null);
-    const [breakdownEntry, setBreakdownEntry] = useState(null);
-
-    const [settings, setSettings] = usePersistentState('ambulanceLogSettings_v6', {
-        grade: '', band: '', step: '', division: '', station: '', userPostcode: ''
-    });
-    
-    const [deleteRequest, setDeleteRequest] = useState(null);
-    const [theme, setTheme] = usePersistentState('ambulanceLogTheme_v2', 'dark');
-    const [sidebarView, setSidebarView] = useState('month');
-    const [hasSeenWelcome, setHasSeenWelcome] = usePersistentState('hasSeenWelcome_v2', false);
-    
-    useEffect(() => {
-        const root = window.document.documentElement;
-        if (theme === 'dark') {
-            root.classList.add('dark');
-        } else {
-            root.classList.remove('dark');
-        }
-    }, [theme]);
-
-    useEffect(() => {
-        // Check for Local Storage availability
-        try {
-            const testKey = 'actracker-storage-test';
-            window.localStorage.setItem(testKey, testKey);
-            window.localStorage.removeItem(testKey);
-        } catch (e) {
-            setShowStorageWarning(true);
-        }
-
-        // Check for app version update if enabled
-        if (ENABLE_UPDATE_NOTIFICATION) {
-            if (lastSeenVersion !== APP_VERSION) {
-                setShowUpdateNotification(true);
-            }
-        }
-
-    }, []);
-
-    const handleCloseUpdateNotification = () => {
-        setShowUpdateNotification(false);
-        setLastSeenVersion(APP_VERSION);
-    }
-
-    // --- HANDLERS ---
-    const handleOpenNewEntryModal = (day) => {
-        setSelectedDate(day);
-        setEditingEntry(null);
-        setIsEntryModalOpen(true);
-    };
-    
-    const handleOpenEditEntryModal = (entry, dateString) => {
-        setSelectedDate(new Date(dateString + 'T12:00:00'));
-        setEditingEntry(entry);
-        setIsEntryModalOpen(true);
-    };
-
-    const handleCloseEntryModal = () => {
-        setIsEntryModalOpen(false);
-        setSelectedDate(null);
-        setEditingEntry(null);
-    };
-
-    const handleOpenBreakdownModal = (entry) => {
-        setBreakdownEntry(entry);
-        setIsBreakdownModalOpen(true);
-    };
-
-    const handleCloseBreakdownModal = () => {
-        setIsBreakdownModalOpen(false);
-        setBreakdownEntry(null);
-    };
-    
-    const handleSaveEntry = async (entryData) => {
-        if (!selectedDate) return;
-
-        let finalData = { ...entryData };
-
-        // Overtime Calculation
-        if (finalData.claimType === 'Late Finish') {
-            const hourlyRate = settings.band && settings.step ? PAY_BANDS[settings.band]?.[settings.step] : 0;
-            if (!hourlyRate) {
-                alert('Please set your Pay Band and Step Point in Settings to calculate overtime pay.');
-                finalData.overtimePay = 0;
-            } else {
-                const overtimeMinutes = (parseInt(finalData.overtimeHours || 0) * 60) + parseInt(finalData.overtimeMinutes || 0);
-                const rateModifier = finalData.isEnhancedRate ? OVERTIME_RATE_ENHANCED : OVERTIME_RATE_STANDARD;
-                const overtimePay = (hourlyRate / 60) * overtimeMinutes * rateModifier;
-                finalData.overtimePay = overtimePay;
-                finalData.overtimeDuration = overtimeMinutes;
-            }
-        }
-        
-        // Mileage Calculation
-        if (finalData.claimType === 'Mileage') {
-            try {
-                let homeCoords, baseCoords, workCoords;
-
-                try {
-                    homeCoords = await getCoordsFromPostcode(settings.userPostcode);
-                } catch (e) {
-                    throw new Error(`Your Home Postcode ('${settings.userPostcode}') could not be found. Please check it in Settings.`);
-                }
-
-                try {
-                    const baseStationPostcode = DIVISIONS_AND_STATIONS[settings.division]?.find(s => s.name === settings.station)?.postcode;
-                    if (!baseStationPostcode) throw new Error('Your Base Station is not selected or invalid. Please check it in Settings.');
-                    baseCoords = await getCoordsFromPostcode(baseStationPostcode);
-                } catch (e) {
-                    throw new Error(`Your Base Station's postcode could not be found. Please check your selection in Settings.`);
-                }
-
-                try {
-                    const workingStationPostcode = DIVISIONS_AND_STATIONS[finalData.workingDivision]?.find(s => s.name === finalData.workingStation)?.postcode;
-                    if (!workingStationPostcode) throw new Error('The selected Working Station is invalid.');
-                    workCoords = await getCoordsFromPostcode(workingStationPostcode);
-                } catch (e) {
-                    throw new Error(`The Working Station's postcode could not be found.`);
-                }
-                
-                const homeToWork = getDistanceFromLatLonInMiles(homeCoords.latitude, homeCoords.longitude, workCoords.latitude, workCoords.longitude);
-                const homeToBase = getDistanceFromLatLonInMiles(homeCoords.latitude, homeCoords.longitude, baseCoords.latitude, baseCoords.longitude);
-                
-                const totalJourneyToWork = homeToWork * 2;
-                const usualJourneyToBase = homeToBase * 2;
-                
-                const claimableMileage = Math.max(0, totalJourneyToWork - usualJourneyToBase);
-                
-                finalData.mileage = claimableMileage.toFixed(2);
-                finalData.mileagePay = claimableMileage * MILEAGE_RATE;
-
-                // --- Store calculation for breakdown view ---
-                finalData.calculationBreakdown = {
-                    homeToWork: homeToWork.toFixed(2),
-                    homeToBase: homeToBase.toFixed(2),
-                    totalJourneyToWork: totalJourneyToWork.toFixed(2),
-                    usualJourneyToBase: usualJourneyToBase.toFixed(2),
-                    claimableMileage: claimableMileage.toFixed(2),
-                    mileageRate: MILEAGE_RATE,
-                    estimatedPay: (claimableMileage * MILEAGE_RATE).toFixed(2)
-                };
-
-            } catch (err) {
-                throw err;
-            }
-        }
-        
-        const year = selectedDate.getFullYear();
-        const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
-        const day = String(selectedDate.getDate()).padStart(2, '0');
-        const dateString = `${year}-${month}-${day}`;
-        const eventType = editingEntry ? 'Update' : 'Creation';
-        
-        setEntries(prevEntries => {
-            const newEntries = JSON.parse(JSON.stringify(prevEntries));
-            const dayEntries = newEntries[dateString] || [];
-
-            if (editingEntry) {
-                const entryIndex = dayEntries.findIndex(e => e.id === editingEntry.id);
-                if (entryIndex > -1) {
-                    dayEntries[entryIndex] = { ...finalData, id: editingEntry.id };
-                }
-            } else {
-                dayEntries.push({ id: crypto.randomUUID(), ...finalData });
-            }
-            newEntries[dateString] = dayEntries;
-            return newEntries;
-        });
-        
-        sendAnalyticsEvent(eventType, finalData, userId);
-        handleCloseEntryModal();
-    };
-
-    const handleDeleteRequest = (entryId, dateString) => {
-        setDeleteRequest({ entryId, dateString });
-    };
-
-    const confirmDelete = () => {
-        if (!deleteRequest) return;
-        const { entryId, dateString } = deleteRequest;
-        
-        const entryToDelete = entries[dateString]?.find(e => e.id === entryId);
-
-        setEntries(prevEntries => {
-            const newEntries = JSON.parse(JSON.stringify(prevEntries));
-            let dayEntries = newEntries[dateString] || [];
-            dayEntries = dayEntries.filter(e => e.id !== entryId);
-
-            if (dayEntries.length > 0) {
-                newEntries[dateString] = dayEntries;
-            } else {
-                delete newEntries[dateString];
-            }
-            
-            return newEntries;
-        });
-
-        if (entryToDelete) {
-            sendAnalyticsEvent('Deletion', entryToDelete, userId);
-        }
-        
-        setDeleteRequest(null);
-        handleCloseEntryModal();
-    };
-    
-    const handleSaveSettings = (newSettings) => {
-        setSettings(newSettings);
-        setIsSettingsModalOpen(false);
-    };
+    const {
+        currentDate,
+        selectedDate,
+        editingEntry,
+        breakdownEntry,
+        entries,
+        settings,
+        theme,
+        sidebarView,
+        hasSeenWelcome,
+        userId,
+        modals,
+        notifications,
+        setCurrentDate,
+        setSidebarView,
+        setHasSeenWelcome,
+        handleSaveEntry,
+        confirmDelete,
+        handleSaveSettings,
+    } = useAppLogic();
 
     const handleSendFeedback = async ({ feedbackType, details, name, screenshot }) => {
         const webhookUrl = 'https://discord.com/api/webhooks/1383407070425911336/HSB7813qTZy4SOPEP-0H2XfE6kzE3UQA5JwR17SRdjaDrHdJgk3MreI7KU83p2kNhKjB';
@@ -256,7 +48,7 @@ export default function Home() {
         const embed = {
             title: `New Feedback: ${feedbackType}`,
             description: details,
-            color: 5814783, // A nice blue color
+            color: 5814783,
             fields: [],
             footer: { text: `User ID: ${userId}` },
             timestamp: new Date().toISOString(),
@@ -304,10 +96,7 @@ export default function Home() {
             return;
         }
 
-        const headers = [
-            "Date", "Claim Type", "Callsign", "Incident Number", "Working Station", "Mileage", "Mileage Pay Est",
-            "Overtime Duration (mins)", "Overtime Pay Est", "Details"
-        ];
+        const headers = ["Date", "Claim Type", "Callsign", "Incident Number", "Working Station", "Mileage", "Mileage Pay Est", "Overtime Duration (mins)", "Overtime Pay Est", "Details"];
         
         const formatCsvField = (data) => {
             if (data === null || data === undefined) return '""';
@@ -321,18 +110,7 @@ export default function Home() {
         const csvRows = [headers.join(',')];
         
         allEntries.forEach(entry => {
-            const row = [
-                entry.date,
-                entry.claimType || '',
-                entry.callsign || '',
-                entry.incidentNumber || '',
-                entry.workingStation || '',
-                entry.mileage || '',
-                entry.mileagePay ? entry.mileagePay.toFixed(2) : '0.00',
-                entry.overtimeDuration || 0,
-                entry.overtimePay ? entry.overtimePay.toFixed(2) : '0.00',
-                entry.details || ''
-            ].map(formatCsvField).join(',');
+            const row = [entry.date, entry.claimType || '', entry.callsign || '', entry.incidentNumber || '', entry.workingStation || '', entry.mileage || '', entry.mileagePay ? entry.mileagePay.toFixed(2) : '0.00', entry.overtimeDuration || 0, entry.overtimePay ? entry.overtimePay.toFixed(2) : '0.00', entry.details || ''].map(formatCsvField).join(',');
             csvRows.push(row);
         });
 
@@ -340,11 +118,8 @@ export default function Home() {
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
-        
-        const today = new Date().toISOString().split('T')[0];
-
         link.setAttribute("href", url);
-        link.setAttribute("download", `Ambulance_Claims_${today}.csv`);
+        link.setAttribute("download", `Ambulance_Claims_${new Date().toISOString().split('T')[0]}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -352,8 +127,8 @@ export default function Home() {
     
     return (
         <div className="flex flex-col min-h-screen">
-            <StorageWarning isOpen={showStorageWarning} onClose={() => setShowStorageWarning(false)} />
-            <UpdateNotification isOpen={showUpdateNotification} onClose={handleCloseUpdateNotification} version={APP_VERSION} />
+            <StorageWarning isOpen={notifications.storage.isOpen} onClose={notifications.storage.close} />
+            <UpdateNotification isOpen={notifications.update.isOpen} onClose={notifications.update.close} version={notifications.update.version} />
             
             <main className="flex-grow pt-16">
                 <ClientOnly>
@@ -363,31 +138,31 @@ export default function Home() {
                                 currentDate={currentDate} 
                                 setCurrentDate={setCurrentDate} 
                                 onExport={handleExport} 
-                                onSettingsClick={() => setIsSettingsModalOpen(true)}
-                                onFeedbackClick={() => setIsFeedbackModalOpen(true)}
+                                onSettingsClick={modals.settings.open}
+                                onFeedbackClick={modals.feedback.open}
                                 theme={theme} 
-                                setTheme={setTheme}
+                                setTheme={useAppLogic().setTheme} // Directly from hook if needed
                             />
                             <div className="mt-4">
-                               <Calendar currentDate={currentDate} onDateClick={handleOpenNewEntryModal} entries={entries} />
+                               <Calendar currentDate={currentDate} onDateClick={modals.entry.open} entries={entries} />
                             </div>
                             <MonthlyEarnings currentDate={currentDate} entries={entries} />
                         </div>
                         <aside className="w-full xl:w-96 mt-8 xl:mt-0 xl:pl-8 xl:border-l border-gray-200 dark:border-gray-700/60">
                              <div className="xl:sticky xl:top-8">
-                               <EntriesSidebar entries={entries} onEdit={handleOpenEditEntryModal} onShowBreakdown={handleOpenBreakdownModal} view={sidebarView} setView={setSidebarView} currentDate={currentDate} />
+                               <EntriesSidebar entries={entries} onEdit={modals.entry.openEdit} onShowBreakdown={modals.breakdown.open} view={sidebarView} setView={setSidebarView} currentDate={currentDate} />
                             </div>
                         </aside>
                     </div>
                     
                     <WelcomeModal isOpen={!hasSeenWelcome} onClose={() => setHasSeenWelcome(true)} />
 
-                    {isEntryModalOpen && selectedDate && (
+                    {modals.entry.isOpen && selectedDate && (
                         <EntryModal 
-                            isOpen={isEntryModalOpen} 
-                            onClose={handleCloseEntryModal} 
+                            isOpen={modals.entry.isOpen} 
+                            onClose={modals.entry.close} 
                             onSave={handleSaveEntry}
-                            onDelete={handleDeleteRequest} 
+                            onDelete={modals.delete.open} 
                             selectedDate={selectedDate} 
                             existingEntry={editingEntry}
                             settings={settings}
@@ -395,41 +170,41 @@ export default function Home() {
                     )}
 
                     <SettingsModal 
-                        isOpen={isSettingsModalOpen} 
-                        onClose={() => setIsSettingsModalOpen(false)}
+                        isOpen={modals.settings.isOpen} 
+                        onClose={modals.settings.close}
                         onSave={handleSaveSettings}
                         currentSettings={settings}
                     />
                     
                     <FeedbackModal
-                        isOpen={isFeedbackModalOpen}
-                        onClose={() => setIsFeedbackModalOpen(false)}
+                        isOpen={modals.feedback.isOpen}
+                        onClose={modals.feedback.close}
                         onSubmit={handleSendFeedback}
                     />
 
                     <ChangelogModal 
-                        isOpen={isChangelogModalOpen}
-                        onClose={() => setIsChangelogModalOpen(false)}
+                        isOpen={modals.changelog.isOpen}
+                        onClose={modals.changelog.close}
                     />
 
                     <AboutModal
-                        isOpen={isAboutModalOpen}
-                        onClose={() => setIsAboutModalOpen(false)}
+                        isOpen={modals.about.isOpen}
+                        onClose={modals.about.close}
                         userId={userId}
                     />
 
                     <MileageBreakdownModal 
-                        isOpen={isBreakdownModalOpen}
-                        onClose={handleCloseBreakdownModal}
+                        isOpen={modals.breakdown.isOpen}
+                        onClose={modals.breakdown.close}
                         entry={breakdownEntry}
                     />
                     
-                    <Modal isOpen={!!deleteRequest} onClose={() => setDeleteRequest(null)}>
+                    <Modal isOpen={modals.delete.isOpen} onClose={modals.delete.close}>
                         <div className="p-6">
                             <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Confirm Deletion</h3>
                             <p className="text-sm text-gray-600 dark:text-gray-400 my-4">Are you sure you want to delete this entry? This action cannot be undone.</p>
                             <div className="flex justify-end space-x-3">
-                                <button onClick={() => setDeleteRequest(null)} className="px-4 py-2 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+                                <button onClick={modals.delete.close} className="px-4 py-2 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">Cancel</button>
                                 <button onClick={confirmDelete} className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">Delete</button>
                             </div>
                         </div>
@@ -437,8 +212,8 @@ export default function Home() {
                 </ClientOnly>
             </main>
             <Footer 
-                onChangelogClick={() => setIsChangelogModalOpen(true)}
-                onAboutClick={() => setIsAboutModalOpen(true)}
+                onChangelogClick={modals.changelog.open}
+                onAboutClick={modals.about.open}
             />
         </div>
     );
