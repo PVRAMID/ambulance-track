@@ -6,6 +6,22 @@ import { X } from 'lucide-react';
 
 const changelogData = [
     {
+        version: "v0.5.0-beta",
+        date: "2025-06-16",
+        changes: [
+            { type: "feat", text: "Added a unique user ID to improve analytics and support. The ID is now visible in the 'About' modal." },
+            { type: "feat", text: "Implemented a notification system to alert users when a new version of the application is available." },
+            { type: "feat", text: "The update notification can now be toggled on or off via a configuration setting in the code." },
+        ]
+    },
+    {
+        version: "v0.4.1-beta",
+        date: "2025-06-16",
+        changes: [
+            { type: "fix", text: "Corrected a timezone-related bug where the calendar would highlight the wrong day and save entries to an incorrect date." },
+        ]
+    },
+    {
         version: "v0.4.0-beta",
         date: "2025-06-14",
         changes: [

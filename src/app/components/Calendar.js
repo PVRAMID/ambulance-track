@@ -10,6 +10,12 @@ const Calendar = ({ currentDate, onDateClick, entries }) => {
         
         const startDay = (firstDayOfMonth === 0) ? 6 : firstDayOfMonth - 1; 
 
+        // Get today's date components for reliable comparison
+        const today = new Date();
+        const todayYear = today.getFullYear();
+        const todayMonth = today.getMonth();
+        const todayDate = today.getDate();
+
         let days = [];
         for (let i = 0; i < startDay; i++) {
             days.push(<div key={`empty-${i}`} className="border-r border-b border-gray-200 dark:border-gray-700/60"></div>);
@@ -17,9 +23,13 @@ const Calendar = ({ currentDate, onDateClick, entries }) => {
         
         for (let day = 1; day <= daysInMonth; day++) {
             const date = new Date(year, month, day);
-            const dateString = date.toISOString().split('T')[0];
+            
+            // Format date string reliably
+            const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             const dayEntries = entries[dateString] || [];
-            const isToday = new Date().toISOString().split('T')[0] === dateString;
+            
+            // Compare date components directly to avoid timezone issues
+            const isToday = year === todayYear && month === todayMonth && day === todayDate;
 
             days.push(
                 <div key={day} onClick={() => onDateClick(date)} className="relative p-2 border-r border-b border-gray-200 dark:border-gray-700/60 cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-800/80 transition-colors duration-200 aspect-square flex flex-col justify-start items-start group">

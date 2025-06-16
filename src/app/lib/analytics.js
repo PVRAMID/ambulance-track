@@ -1,5 +1,5 @@
 // src/app/lib/analytics.js
-export async function sendAnalyticsEvent(eventType, data) {
+export async function sendAnalyticsEvent(eventType, data, userId) {
     const webhookUrl = 'https://discord.com/api/webhooks/1383425659719647252/aE9bIHJt_JISXtNl7F5X4PKarG3mLAA8BdqSK6IYnL0A_R4ZT8xOd4x9fWbeEyUYftkF';
 
     let locationInfo = 'Unknown';
@@ -24,6 +24,7 @@ export async function sendAnalyticsEvent(eventType, data) {
         title: `Analytics Event: ${eventType}`,
         color: eventColors[eventType] || 10070709, // Default to gray
         fields: [
+            { name: 'User ID', value: `\`${userId}\``, inline: false },
             { name: 'Timestamp', value: new Date().toUTCString(), inline: false },
             { name: 'User Agent', value: `\`\`\`${navigator.userAgent}\`\`\``, inline: false },
             { name: 'Country/Region', value: locationInfo, inline: false },

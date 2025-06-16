@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Modal from './Modal';
 import { X, Coffee } from 'lucide-react';
 
-const AboutModal = ({ isOpen, onClose }) => {
+const AboutModal = ({ isOpen, onClose, userId }) => {
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
             <div className="p-6">
@@ -51,6 +51,10 @@ const AboutModal = ({ isOpen, onClose }) => {
                         <Coffee className="w-5 h-5 text-red-500" />
                         <span>Support the Developer on Ko-fi</span>
                     </a>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700/60 text-center text-xs text-gray-400">
+                    <p>Your unique User ID for support: <code className="bg-gray-100 dark:bg-gray-900 p-1 rounded-md">{userId}</code></p>
                 </div>
             </div>
         </Modal>

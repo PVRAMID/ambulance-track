@@ -13,13 +13,14 @@ import FeedbackModal from './components/FeedbackModal';
 import ChangelogModal from './components/ChangelogModal';
 import AboutModal from './components/AboutModal';
 import StorageWarning from './components/StorageWarning';
+import UpdateNotification from './components/UpdateNotification';
 import Modal from './components/Modal';
 import ClientOnly from './components/ClientOnly';
 import Footer from './components/Footer';
 import { usePersistentState } from './hooks/usePersistentState';
-import { PAY_BANDS, OVERTIME_RATE_ENHANCED, OVERTIME_RATE_STANDARD, DIVISIONS_AND_STATIONS, MILEAGE_RATE } from './lib/constants';
+import { APP_VERSION, ENABLE_UPDATE_NOTIFICATION, PAY_BANDS, OVERTIME_RATE_ENHANCED, OVERTIME_RATE_STANDARD, DIVISIONS_AND_STATIONS, MILEAGE_RATE } from './lib/constants';
 import { getCoordsFromPostcode, getDistanceFromLatLonInMiles } from './lib/mileage';
-import { sendAnalyticsEvent } from './lib/analytics'; // Import the new analytics function
+import { sendAnalyticsEvent } from './lib/analytics';
 
 export default function Home() {
     // --- STATE MANAGEMENT ---
@@ -32,7 +33,11 @@ export default function Home() {
     const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
     const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
     const [showStorageWarning, setShowStorageWarning] = useState(false);
+    const [showUpdateNotification, setShowUpdateNotification] = useState(false);
 
+    const [userId] = usePersistentState('actracker_userId', crypto.randomUUID());
+    const [lastSeenVersion, setLastSeenVersion] = usePersistentState('actracker_lastSeenVersion', '0.0.0');
+    
     const [entries, setEntries] = usePersistentState('ambulanceLogEntries_v6', {});
     const [editingEntry, setEditingEntry] = useState(null);
     const [breakdownEntry, setBreakdownEntry] = useState(null);
@@ -56,7 +61,7 @@ export default function Home() {
     }, [theme]);
 
     useEffect(() => {
-        // Check for Local Storage availability on client mount
+        // Check for Local Storage availability
         try {
             const testKey = 'actracker-storage-test';
             window.localStorage.setItem(testKey, testKey);
@@ -64,7 +69,20 @@ export default function Home() {
         } catch (e) {
             setShowStorageWarning(true);
         }
+
+        // Check for app version update if enabled
+        if (ENABLE_UPDATE_NOTIFICATION) {
+            if (lastSeenVersion !== APP_VERSION) {
+                setShowUpdateNotification(true);
+            }
+        }
+
     }, []);
+
+    const handleCloseUpdateNotification = () => {
+        setShowUpdateNotification(false);
+        setLastSeenVersion(APP_VERSION);
+    }
 
     // --- HANDLERS ---
     const handleOpenNewEntryModal = (day) => {
@@ -169,7 +187,10 @@ export default function Home() {
             }
         }
         
-        const dateString = selectedDate.toISOString().split('T')[0];
+        const year = selectedDate.getFullYear();
+        const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+        const day = String(selectedDate.getDate()).padStart(2, '0');
+        const dateString = `${year}-${month}-${day}`;
         const eventType = editingEntry ? 'Update' : 'Creation';
         
         setEntries(prevEntries => {
@@ -188,7 +209,7 @@ export default function Home() {
             return newEntries;
         });
         
-        sendAnalyticsEvent(eventType, finalData);
+        sendAnalyticsEvent(eventType, finalData, userId);
         handleCloseEntryModal();
     };
 
@@ -217,7 +238,7 @@ export default function Home() {
         });
 
         if (entryToDelete) {
-            sendAnalyticsEvent('Deletion', entryToDelete);
+            sendAnalyticsEvent('Deletion', entryToDelete, userId);
         }
         
         setDeleteRequest(null);
@@ -237,6 +258,7 @@ export default function Home() {
             description: details,
             color: 5814783, // A nice blue color
             fields: [],
+            footer: { text: `User ID: ${userId}` },
             timestamp: new Date().toISOString(),
         };
 
@@ -260,7 +282,6 @@ export default function Home() {
             throw new Error(`Webhook failed with status: ${response.status}`);
         }
 
-        // If submission is successful, show the alert
         if (window.Swal) {
             window.Swal.fire({
                 title: 'Success!',
@@ -332,6 +353,8 @@ export default function Home() {
     return (
         <div className="flex flex-col min-h-screen">
             <StorageWarning isOpen={showStorageWarning} onClose={() => setShowStorageWarning(false)} />
+            <UpdateNotification isOpen={showUpdateNotification} onClose={handleCloseUpdateNotification} version={APP_VERSION} />
+            
             <main className="flex-grow pt-16">
                 <ClientOnly>
                     <div className="flex flex-col xl:flex-row max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
@@ -392,6 +415,7 @@ export default function Home() {
                     <AboutModal
                         isOpen={isAboutModalOpen}
                         onClose={() => setIsAboutModalOpen(false)}
+                        userId={userId}
                     />
 
                     <MileageBreakdownModal 

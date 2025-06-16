@@ -1,4 +1,6 @@
 // src/app/lib/constants.js
+export const APP_VERSION = "v0.5.0-beta";
+export const ENABLE_UPDATE_NOTIFICATION = false; // Toggle the update notification feature here
 export const MILEAGE_RATE = 0.45;
 export const DISTURBED_MEAL_PAY = 20;
 export const LUNCH_ALLOWANCE_PAY = 5;
