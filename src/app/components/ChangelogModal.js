@@ -5,6 +5,13 @@ import Modal from './Modal';
 import { X } from 'lucide-react';
 
 const changelogData = [
+     {
+        version: "v0.6.2-beta",
+        date: "2025-06-17",
+        changes: [
+            { type: "fix", text: "All allowances available on ePay have now been transferred over, including accurate descriptions, values and epay prompts." },
+        ]
+    },
     {
         version: "v0.6.1-beta",
         date: "2025-06-17",

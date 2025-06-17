@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { usePersistentState } from './usePersistentState';
 import { calculateOvertime, calculateMileage } from '../lib/calculations';
 import { sendAnalyticsEvent } from '../lib/analytics';
-import { APP_VERSION, ENABLE_UPDATE_NOTIFICATION } from '../lib/constants';
+import { APP_VERSION, ENABLE_UPDATE_NOTIFICATION, ALLOWANCE_CLAIM_TYPES } from '../lib/constants';
 
 export function useAppLogic() {
     // --- STATE MANAGEMENT ---
@@ -73,7 +73,7 @@ export function useAppLogic() {
         setEditingEntry(entry);
         setIsEntryModalOpen(true);
     };
-
+    
     const handleSetEditingEntry = (entry) => {
         setEditingEntry(entry);
     };
@@ -98,14 +98,15 @@ export function useAppLogic() {
                 finalData.overtimePay = overtimePay;
                 finalData.overtimeDuration = overtimeDuration;
             }
-        }
-
-        if (finalData.claimType === 'Mileage') {
+        } else if (finalData.claimType === 'Mileage') {
             const { mileage, mileagePay, calculationBreakdown } = await calculateMileage(settings, finalData.workingDivision, finalData.workingStation);
             finalData.mileage = mileage;
             finalData.mileagePay = mileagePay;
             finalData.calculationBreakdown = calculationBreakdown;
+        } else if (finalData.claimType in ALLOWANCE_CLAIM_TYPES) {
+            finalData.pay = ALLOWANCE_CLAIM_TYPES[finalData.claimType].value;
         }
+
 
         const year = selectedDate.getFullYear();
         const month = String(selectedDate.getMonth() + 1).padStart(2, '0');

@@ -2,11 +2,41 @@
 export const APP_VERSION = "v0.5.0-beta";
 export const ENABLE_UPDATE_NOTIFICATION = false; // Toggle the update notification feature here
 export const MILEAGE_RATE = 0.45;
-export const DISTURBED_MEAL_PAY = 20;
-export const LUNCH_ALLOWANCE_PAY = 5;
-export const EVENING_MEAL_ALLOWANCE_PAY = 15;
 export const OVERTIME_RATE_STANDARD = 1.3;
 export const OVERTIME_RATE_ENHANCED = 1.6;
+
+export const ALLOWANCE_CLAIM_TYPES = {
+    'Away from Base - Annex 14 >5': {
+        description: 'Away from base for more than 5 hours and less than 10 hours including lunchtime (12-2) Annex 14',
+        value: 5,
+        ePayPrompt: 'Away from Base - Annex 14 >5 AFC'
+    },
+    'Rest Break Away from Base': {
+        description: 'Rest break away from base - Does not meet the criteria for Annex 14',
+        value: 5,
+        ePayPrompt: 'Rest Break away from base BAS Non AFC'
+    },
+    'Away from Base - Annex 14 >10': {
+        description: 'Evening Meal Subsistence - More than 10 hours away from base and return after 7pm',
+        value: 15,
+        ePayPrompt: 'Away from Base - Annex 14 >10 AFC'
+    },
+    'Late Rest Break': {
+        description: 'Rest Break outside of meal break window LMB',
+        value: 10,
+        ePayPrompt: 'Rest Break outside of meal break window Non AFC'
+    },
+    'Disturbed Rest Break': {
+        description: 'Disturbed Rest Break',
+        value: 20,
+        ePayPrompt: 'Disturbed Rest Break DMB Non AFC'
+    },
+    'No Rest Break': {
+        description: 'No Rest Break allocated',
+        value: 10,
+        ePayPrompt: 'No Rest Break NMB Non AFC'
+    }
+};
 
 export const PAY_BANDS = {
     'Band 3': { 'Entry': 12.75, 'Top': 13.60 },

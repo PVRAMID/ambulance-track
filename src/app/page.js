@@ -97,7 +97,7 @@ export default function Home() {
             return;
         }
 
-        const headers = ["Date", "Claim Type", "Callsign", "Incident Number", "Working Station", "Mileage", "Mileage Pay Est", "Overtime Duration (mins)", "Overtime Pay Est", "Details"];
+        const headers = ["Date", "Claim Type", "Callsign", "Incident Number", "Working Station", "Mileage", "Mileage Pay Est", "Overtime Duration (mins)", "Overtime Pay Est", "Allowance Pay", "Details"];
         
         const formatCsvField = (data) => {
             if (data === null || data === undefined) return '""';
@@ -111,7 +111,19 @@ export default function Home() {
         const csvRows = [headers.join(',')];
         
         allEntries.forEach(entry => {
-            const row = [entry.date, entry.claimType || '', entry.callsign || '', entry.incidentNumber || '', entry.workingStation || '', entry.mileage || '', entry.mileagePay ? entry.mileagePay.toFixed(2) : '0.00', entry.overtimeDuration || 0, entry.overtimePay ? entry.overtimePay.toFixed(2) : '0.00', entry.details || ''].map(formatCsvField).join(',');
+            const row = [
+                entry.date, 
+                entry.claimType || '', 
+                entry.callsign || '', 
+                entry.incidentNumber || '', 
+                entry.workingStation || '', 
+                entry.mileage || '', 
+                entry.mileagePay ? entry.mileagePay.toFixed(2) : '0.00', 
+                entry.overtimeDuration || 0, 
+                entry.overtimePay ? entry.overtimePay.toFixed(2) : '0.00',
+                entry.pay ? entry.pay.toFixed(2) : '0.00',
+                entry.details || ''
+            ].map(formatCsvField).join(',');
             csvRows.push(row);
         });
 
