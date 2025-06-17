@@ -12,6 +12,7 @@ import MileageBreakdownModal from './components/MileageBreakdownModal';
 import FeedbackModal from './components/FeedbackModal';
 import ChangelogModal from './components/ChangelogModal';
 import AboutModal from './components/AboutModal';
+import RecoveryModal from './components/RecoveryModal';
 import StorageWarning from './components/StorageWarning';
 import UpdateNotification from './components/UpdateNotification';
 import Modal from './components/Modal';
@@ -165,6 +166,7 @@ export default function Home() {
                                 onExport={handleExport} 
                                 onSettingsClick={modals.settings.open}
                                 onFeedbackClick={modals.feedback.open}
+                                onRecoveryClick={modals.recovery.open}
                                 theme={theme} 
                                 setTheme={setTheme}
                             />
@@ -203,6 +205,14 @@ export default function Home() {
                         currentSettings={settings}
                     />
                     
+                    <RecoveryModal
+                        isOpen={modals.recovery.isOpen}
+                        onClose={modals.recovery.close}
+                        recoveryId={userId}
+                        onRecover={() => alert("Recovery logic not yet implemented.")}
+                        onDelete={() => alert("Delete logic not yet implemented.")}
+                    />
+
                     <FeedbackModal
                         isOpen={modals.feedback.isOpen}
                         onClose={modals.feedback.close}
@@ -241,6 +251,7 @@ export default function Home() {
             <Footer 
                 onChangelogClick={modals.changelog.open}
                 onAboutClick={modals.about.open}
+                onRecoveryClick={modals.recovery.open}
             />
         </div>
     );

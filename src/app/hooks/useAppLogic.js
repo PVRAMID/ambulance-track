@@ -20,6 +20,7 @@ export function useAppLogic() {
     const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
     const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
     const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
+    const [isRecoveryModalOpen, setIsRecoveryModalOpen] = useState(false);
     
     // Notification states
     const [showStorageWarning, setShowStorageWarning] = useState(false);
@@ -181,6 +182,7 @@ export function useAppLogic() {
             changelog: { isOpen: isChangelogModalOpen, open: () => setIsChangelogModalOpen(true), close: () => setIsChangelogModalOpen(false) },
             about: { isOpen: isAboutModalOpen, open: () => setIsAboutModalOpen(true), close: () => setIsAboutModalOpen(false) },
             delete: { isOpen: !!deleteRequest, open: setDeleteRequest, close: () => setDeleteRequest(null) },
+            recovery: { isOpen: isRecoveryModalOpen, open: () => setIsRecoveryModalOpen(true), close: () => setIsRecoveryModalOpen(false) },
         },
         notifications: {
             storage: { isOpen: showStorageWarning, close: () => setShowStorageWarning(false) },
