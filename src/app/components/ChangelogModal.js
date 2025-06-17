@@ -6,6 +6,13 @@ import { X } from 'lucide-react';
 
 const changelogData = [
     {
+        version: "v0.6.1-beta",
+        date: "2025-06-17",
+        changes: [
+            { type: "fix", text: "Pushed a potential fix for being unable to delete entries." },
+        ]
+    },
+    {
         version: "v0.6.0-beta",
         date: "2025-06-16",
         changes: [
