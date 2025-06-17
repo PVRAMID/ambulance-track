@@ -138,8 +138,34 @@ const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingE
                         <div className="p-4 bg-gray-100 dark:bg-gray-700/60 rounded-lg space-y-4">
                             <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Overtime Details</p>
                             <div className="grid grid-cols-2 gap-4">
-                                <input type="number" name="overtimeHours" value={formData.overtimeHours || '0'} onChange={handleChange} min="0" className="w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-900 dark:text-gray-100"/>
-                                <input type="number" name="overtimeMinutes" value={formData.overtimeMinutes || '0'} onChange={handleChange} min="0" max="59" className="w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-900 dark:text-gray-100"/>
+                                <div>
+                                    <label htmlFor="overtimeHours" className="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-1.5">Hours</label>
+                                    <select
+                                        id="overtimeHours"
+                                        name="overtimeHours"
+                                        value={formData.overtimeHours || '0'}
+                                        onChange={handleSelectChange}
+                                        className="w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-gray-900 dark:text-gray-100"
+                                    >
+                                        {Array.from({ length: 13 }, (_, i) => (
+                                            <option key={i} value={i}>{i}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label htmlFor="overtimeMinutes" className="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-1.5">Minutes</label>
+                                    <select
+                                        id="overtimeMinutes"
+                                        name="overtimeMinutes"
+                                        value={formData.overtimeMinutes || '0'}
+                                        onChange={handleSelectChange}
+                                        className="w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-gray-900 dark:text-gray-100"
+                                    >
+                                        {Array.from({ length: 60 }, (_, i) => (
+                                            <option key={i} value={i}>{i}</option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
                             <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-500/30 rounded-lg text-yellow-800 dark:text-yellow-200 text-xs flex items-start space-x-2">
                                 <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />

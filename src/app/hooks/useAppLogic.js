@@ -190,6 +190,7 @@ export function useAppLogic() {
         // Handlers
         setCurrentDate,
         setSidebarView,
+        setTheme,
         setHasSeenWelcome,
         handleSaveEntry,
         handleSetEditingEntry,

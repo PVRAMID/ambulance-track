@@ -36,6 +36,7 @@ export default function Home() {
         notifications,
         setCurrentDate,
         setSidebarView,
+        setTheme,
         setHasSeenWelcome,
         handleSaveEntry,
         handleSetEditingEntry,
@@ -165,7 +166,7 @@ export default function Home() {
                                 onSettingsClick={modals.settings.open}
                                 onFeedbackClick={modals.feedback.open}
                                 theme={theme} 
-                                setTheme={useAppLogic().setTheme} // Directly from hook if needed
+                                setTheme={setTheme}
                             />
                             <div className="mt-4">
                                <Calendar currentDate={currentDate} onDateClick={modals.entry.open} entries={entries} />
