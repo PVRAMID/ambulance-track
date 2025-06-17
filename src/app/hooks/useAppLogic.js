@@ -74,6 +74,10 @@ export function useAppLogic() {
         setIsEntryModalOpen(true);
     };
 
+    const handleSetEditingEntry = (entry) => {
+        setEditingEntry(entry);
+    };
+
     const handleCloseEntryModal = () => {
         setIsEntryModalOpen(false);
         setSelectedDate(null);
@@ -187,6 +191,7 @@ export function useAppLogic() {
         setSidebarView,
         setHasSeenWelcome,
         handleSaveEntry,
+        handleSetEditingEntry,
         confirmDelete,
         handleSaveSettings,
     };

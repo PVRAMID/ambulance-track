@@ -38,6 +38,7 @@ export default function Home() {
         setSidebarView,
         setHasSeenWelcome,
         handleSaveEntry,
+        handleSetEditingEntry,
         confirmDelete,
         handleSaveSettings,
     } = useAppLogic();
@@ -124,6 +125,17 @@ export default function Home() {
         link.click();
         document.body.removeChild(link);
     };
+
+    const getFormattedDateString = (date) => {
+        if (!date) return null;
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const dateString = getFormattedDateString(selectedDate);
+    const entriesForDay = dateString && entries[dateString] ? entries[dateString] : [];
     
     return (
         <div className="flex flex-col min-h-screen">
@@ -166,6 +178,8 @@ export default function Home() {
                             selectedDate={selectedDate} 
                             existingEntry={editingEntry}
                             settings={settings}
+                            entriesForDay={entriesForDay}
+                            onSelectForEdit={handleSetEditingEntry}
                         />
                     )}
 
