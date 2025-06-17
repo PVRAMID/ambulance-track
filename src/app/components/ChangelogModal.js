@@ -10,6 +10,10 @@ const changelogData = [
         date: "2025-06-17",
         changes: [
             { type: "fix", text: "Pushed a potential fix for being unable to delete entries." },
+            { type: "feat", text: "Added the ability to see entries by day when the user clicks on a specific day in calendar view." },
+            { type: "backend", text: "Removed some sensitive information from the codebase and created environment variables to prevent backdoor attacks." },
+            { type: "known_issue", text: "Light/Dark mode is not functioning as expected, there is a potential fix pending." },
+            { type: "known_issue", text: "Claim types need to be adjusted, such as regular LMB, LMB+AnnexN etc." }
         ]
     },
     {
@@ -114,6 +118,7 @@ const Tag = ({ type }) => {
         backend: "bg-purple-100 dark:bg-purple-900/60 text-purple-800 dark:text-purple-300",
         server: "bg-gray-200 dark:bg-gray-700/60 text-gray-800 dark:text-gray-300",
         suggested: "bg-yellow-100 dark:bg-yellow-900/60 text-yellow-800 dark:text-yellow-300",
+        known_issue: "bg-yellow-100 dark:bg-yellow-900/60 text-yellow-800 dark:text-yellow-300",
     };
     const text = {
         feat: "Feature",
@@ -121,7 +126,8 @@ const Tag = ({ type }) => {
         fix: "Fix",
         backend: "Backend",
         server: "Server",
-        suggested: "Suggested Feature"
+        suggested: "Suggested Feature",
+        known_issue: "Known Issue",
     }
     return <span className={`px-2 py-0.5 rounded-md text-xs font-semibold ${styles[type] || styles.fix}`}>{text[type] || "Update"}</span>
 }
