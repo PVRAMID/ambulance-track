@@ -10,6 +10,7 @@ const changelogData = [
         date: "2025-06-17",
         changes: [
             { type: "fix", text: "All allowances available on ePay have now been transferred over, including accurate descriptions, values and epay prompts." },
+            { type: "fix", text: "A problem where the user wouldn't be able to view the mileage calculation breakdown has been fixed!." },
         ]
     },
     {
