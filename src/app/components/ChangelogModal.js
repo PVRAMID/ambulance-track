@@ -10,6 +10,7 @@ const changelogData = [
         date: "2025-06-18",
         changes: [
             { type: "feat", text: "Announcements section has now been created to be able to provide live app updates to users." },
+            { type: "fix", text: "Added Student Technician to Payscales (75% of Band 4, £12.24/hour)" },
             
         ]
     },

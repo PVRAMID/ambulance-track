@@ -41,7 +41,7 @@ export const ALLOWANCE_CLAIM_TYPES = {
 
 export const PAY_BANDS = {
     'Band 3': { 'Entry': 12.75, 'Top': 13.60 },
-    'Band 4': { 'Entry': 14.06, 'Top': 15.43 },
+    'Band 4': { '[EMAS] Student Technician (75%)': 12.24, 'Entry': 14.06, 'Top': 15.43 },
     'Band 5': { 'Entry': 15.88, 'Intermediate': 17.13, 'Top': 19.33 },
     'Band 6': { 'Entry': 19.78, 'Intermediate': 20.88, 'Top': 23.82 },
     'Band 7': { 'Entry': 24.45, 'Intermediate': 25.71, 'Top': 27.98 },
