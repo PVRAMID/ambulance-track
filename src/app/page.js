@@ -19,6 +19,7 @@ import UpdateNotification from './components/UpdateNotification';
 import InformationModal from './components/InformationModal';
 import Modal from './components/Modal';
 import ClientOnly from './components/ClientOnly';
+import AnnouncementsModal from './components/AnnouncementsModal';
 import Footer from './components/Footer';
 import { useAppLogic } from './hooks/useAppLogic';
 
@@ -38,6 +39,9 @@ export default function Home() {
         syncStatus,
         modals,
         notifications,
+        hasUnread,
+        announcements,
+        handleMarkAnnouncementsAsRead,
         setCurrentDate,
         setSidebarView,
         setTheme,
@@ -180,6 +184,8 @@ export default function Home() {
                                 syncStatus={syncStatus}
                                 theme={theme} 
                                 setTheme={setTheme}
+                                onAnnouncementsClick={modals.announcements.open}
+                                hasUnread={hasUnread}
                             />
                             <div className="mt-4">
                                <Calendar currentDate={currentDate} onDateClick={modals.entry.open} entries={entries} />
@@ -246,6 +252,13 @@ export default function Home() {
                         isOpen={modals.about.isOpen}
                         onClose={modals.about.close}
                         userId={userId}
+                    />
+
+                    <AnnouncementsModal
+                        isOpen={modals.announcements.isOpen}
+                        onClose={modals.announcements.close}
+                        announcements={announcements}
+                        onOpened={handleMarkAnnouncementsAsRead}
                     />
 
                     <MileageBreakdownModal 

@@ -1,7 +1,6 @@
-// src/app/components/Header.js
 'use client';
 import React from 'react';
-import { ChevronLeft, ChevronRight, Download, Settings, Sun, Moon, MessageSquare, LifeBuoy, RefreshCw, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, Settings, Sun, Moon, MessageSquare, LifeBuoy, RefreshCw, AlertCircle, CheckCircle, XCircle, Megaphone } from 'lucide-react';
 
 const SyncIcon = ({ status }) => {
     switch (status) {
@@ -11,12 +10,12 @@ const SyncIcon = ({ status }) => {
             return <RefreshCw className="w-5 h-5 text-yellow-500 animate-spin" />;
         case 'error':
             return <AlertCircle className="w-5 h-5 text-red-500" />;
-        default: // disabled
+        default:
             return <XCircle className="w-5 h-5 text-gray-500" />;
     }
 };
 
-const Header = ({ currentDate, setCurrentDate, onExport, onSettingsClick, onFeedbackClick, onRecoveryClick, onSyncToggleClick, onForceSyncClick, isSyncEnabled, syncStatus, theme, setTheme }) => {
+const Header = ({ currentDate, setCurrentDate, onExport, onSettingsClick, onFeedbackClick, onRecoveryClick, onSyncToggleClick, onForceSyncClick, isSyncEnabled, syncStatus, theme, setTheme, onAnnouncementsClick, hasUnread }) => {
     const changeMonth = (offset) => {
         setCurrentDate(prevDate => {
             const newDate = new Date(prevDate);
@@ -43,6 +42,16 @@ const Header = ({ currentDate, setCurrentDate, onExport, onSettingsClick, onFeed
                 {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
             </h1>
             <div className="flex items-center space-x-2">
+                 <button 
+                    onClick={onAnnouncementsClick} 
+                    className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors relative"
+                    title="Announcements"
+                >
+                    <Megaphone className="w-5 h-5" />
+                    {hasUnread && (
+                        <span className="absolute top-1 right-1 block h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-800" />
+                    )}
+                </button>
                 <button 
                     onClick={onFeedbackClick} 
                     className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors"

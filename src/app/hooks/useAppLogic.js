@@ -1,9 +1,8 @@
-// src/app/hooks/useAppLogic.js
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { usePersistentState } from './usePersistentState';
 import { useSync } from './useSync';
-import { syncData, recoverData, deleteServerData } from './useFirebase';
+import { syncData, recoverData, deleteServerData, getAnnouncements } from './useFirebase';
 import { calculateOvertime, calculateMileage } from '../lib/calculations';
 import { sendAnalyticsEvent } from '../lib/analytics';
 import { APP_VERSION, ENABLE_UPDATE_NOTIFICATION, ALLOWANCE_CLAIM_TYPES } from '../lib/constants';
@@ -21,7 +20,6 @@ function generateWordId() {
 }
 
 export function useAppLogic() {
-    // --- STATE MANAGEMENT ---
     const [userId] = usePersistentState('actracker_userId', generateWordId());
     const [entries, setEntries] = usePersistentState('ambulanceLogEntries_v6', {});
     const [settings, setSettings] = usePersistentState('ambulanceLogSettings_v6', {
@@ -29,14 +27,12 @@ export function useAppLogic() {
     });
     const { isSyncEnabled, setIsSyncEnabled, syncStatus, setSyncStatus } = useSync();
     
-    // --- Other states
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(null);
     const [editingEntry, setEditingEntry] = useState(null);
     const [breakdownEntry, setBreakdownEntry] = useState(null);
     const [deleteRequest, setDeleteRequest] = useState(null);
 
-    // Modal states
     const [isEntryModalOpen, setIsEntryModalOpen] = useState(false);
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
@@ -44,19 +40,41 @@ export function useAppLogic() {
     const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
     const [isRecoveryModalOpen, setIsRecoveryModalOpen] = useState(false);
     const [isSyncConfirmModalOpen, setIsSyncConfirmModalOpen] = useState(false);
+    const [isAnnouncementsModalOpen, setIsAnnouncementsModalOpen] = useState(false);
     const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
     
-    // Notification states
     const [showStorageWarning, setShowStorageWarning] = useState(false);
     const [showUpdateNotification, setShowUpdateNotification] = useState(false);
 
-    // Persistent states
+    const [announcements, setAnnouncements] = useState([]);
+    const [lastReadAnnouncement, setLastReadAnnouncement] = usePersistentState('actracker_lastReadAnnouncement', null);
+    const [hasUnread, setHasUnread] = useState(false);
+
     const [lastSeenVersion, setLastSeenVersion] = usePersistentState('actracker_lastSeenVersion', '0.0.0');
     const [theme, setTheme] = usePersistentState('ambulanceLogTheme_v2', 'dark');
     const [sidebarView, setSidebarView] = useState('month');
     const [hasSeenWelcome, setHasSeenWelcome] = usePersistentState('hasSeenWelcome_v2', false);
 
-    // --- DATA SYNCING ---
+    useEffect(() => {
+        const fetchAnnouncements = async () => {
+            const result = await getAnnouncements();
+            if (result.success) {
+                setAnnouncements(result.data);
+                if (result.data.length > 0 && result.data[0].id !== lastReadAnnouncement) {
+                    setHasUnread(true);
+                }
+            }
+        };
+        fetchAnnouncements();
+    }, [lastReadAnnouncement]);
+
+    const handleMarkAnnouncementsAsRead = () => {
+        if (announcements.length > 0) {
+            setLastReadAnnouncement(announcements[0].id);
+            setHasUnread(false);
+        }
+    };
+
     const triggerSync = useCallback(async (currentEntries, currentSettings) => {
         if (!isSyncEnabled) return;
         setSyncStatus('pending');
@@ -69,7 +87,6 @@ export function useAppLogic() {
         }
     }, [isSyncEnabled, userId, setSyncStatus]);
 
-    // --- HANDLERS ---
     const handleToggleSync = () => {
         const newSyncState = !isSyncEnabled;
         setIsSyncEnabled(newSyncState);
@@ -173,9 +190,11 @@ export function useAppLogic() {
     const handleSetEditingEntry = (entry) => setEditingEntry(entry);
     const handleCloseEntryModal = () => { setIsEntryModalOpen(false); setSelectedDate(null); setEditingEntry(null); };
 
-
     return {
         currentDate, selectedDate, editingEntry, breakdownEntry, deleteRequest, entries, settings, theme, sidebarView, hasSeenWelcome, userId, isSyncEnabled, syncStatus,
+        hasUnread,
+        announcements,
+        handleMarkAnnouncementsAsRead,
         modals: {
             entry: { isOpen: isEntryModalOpen, open: handleOpenNewEntryModal, close: handleCloseEntryModal, openEdit: handleOpenEditEntryModal },
             settings: { isOpen: isSettingsModalOpen, open: () => setIsSettingsModalOpen(true), close: () => setIsSettingsModalOpen(false) },
@@ -186,6 +205,7 @@ export function useAppLogic() {
             delete: { isOpen: !!deleteRequest, open: setDeleteRequest, close: () => setDeleteRequest(null) },
             recovery: { isOpen: isRecoveryModalOpen, open: () => setIsRecoveryModalOpen(true), close: () => setIsRecoveryModalOpen(false) },
             syncConfirm: { isOpen: isSyncConfirmModalOpen, open: () => setIsSyncConfirmModalOpen(true), close: () => setIsSyncConfirmModalOpen(false) },
+            announcements: { isOpen: isAnnouncementsModalOpen, open: () => setIsAnnouncementsModalOpen(true), close: () => setIsAnnouncementsModalOpen(false) },
             info: { isOpen: isInfoModalOpen, open: () => setIsInfoModalOpen(true), close: () => setIsInfoModalOpen(false) },
         },
         notifications: { storage: { isOpen: showStorageWarning, close: () => setShowStorageWarning(false) }, update: { isOpen: showUpdateNotification, close: handleCloseUpdateNotification, version: APP_VERSION },},

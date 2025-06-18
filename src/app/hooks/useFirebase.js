@@ -1,9 +1,6 @@
-// src/app/hooks/useFirebase.js
-import { doc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, deleteDoc, collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { devLog } from '../lib/logger';
-
-// A stateless collection of functions to interact with Firebase.
 
 export const syncData = async (userId, dataToSync) => {
   if (!userId) return { success: false, error: 'No user ID provided.' };
@@ -54,4 +51,20 @@ export const deleteServerData = async (userId) => {
     devLog('Error deleting server data:', error);
     return { success: false, error: 'An error occurred while deleting your data.' };
   }
+};
+
+export const getAnnouncements = async () => {
+    devLog('Fetching announcements from Firestore...');
+    try {
+        const announcementsCol = collection(db, 'announcements');
+        const q = query(announcementsCol, orderBy('timestamp', 'desc'));
+        const querySnapshot = await getDocs(q);
+        const announcements = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        devLog(`Successfully fetched ${announcements.length} announcements.`);
+        return { success: true, data: announcements };
+    } catch (error) {
+        console.error("Error fetching announcements:", error);
+        devLog('Announcement fetch failed:', error);
+        return { success: false, error: 'Could not fetch announcements.' };
+    }
 };
