@@ -5,6 +5,14 @@ import Modal from './Modal';
 import { X } from 'lucide-react';
 
 const changelogData = [
+    {
+        version: "v0.8.0-beta",
+        date: "2025-06-18",
+        changes: [
+            { type: "feat", text: "Announcements section has now been created to be able to provide live app updates to users." },
+            
+        ]
+    },
      {
         version: "v0.7.0-beta",
         date: "2025-06-18",
