@@ -12,6 +12,7 @@ const changelogData = [
             { type: "feat", text: "Announcements section has now been created to be able to provide live app updates to users." },
             { type: "fix", text: "Added Student Technician to Payscales (75% of Band 4, £12.24/hour)" },
             { type: "fix", text: "Added Market Rasen to Lincs Stations List" },
+            { type: "fix", text: "Added ASC to Grades List" },
             
         ]
     },

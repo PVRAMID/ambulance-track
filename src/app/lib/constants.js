@@ -52,7 +52,7 @@ export const PAY_BANDS = {
     'Band 9': { 'Entry': 55.84, 'Intermediate': 59.20, 'Top': 64.25 },
 };
 
-export const GRADES = ['UCA', 'ECA', 'Technician', 'Paramedic', 'Specialist Paramedic'];
+export const GRADES = ['UCA', 'ECA', 'ASC', 'Technician', 'Paramedic', 'Specialist Paramedic'];
 
 export const DIVISIONS = ["Nottinghamshire", "Derbyshire", "Leicestershire", "Northamptonshire", "Lincolnshire"];
 
