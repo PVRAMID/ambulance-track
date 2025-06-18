@@ -59,7 +59,7 @@ const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingE
             newErrors.callsign = "Callsign is required";
         }
 
-        const requiresIncidentNumber = ['Late Finish', 'Late Rest Break', 'No Rest Break', 'Disturbed Rest Break'];
+        const requiresIncidentNumber = ['Disturbed Rest Break'];
         if (requiresIncidentNumber.includes(formData.claimType) && !formData.incidentNumber) {
             newErrors.incidentNumber = "Incident number is required";
         }
