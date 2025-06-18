@@ -3,7 +3,7 @@
 import React from 'react';
 
 const Footer = ({ onChangelogClick, onAboutClick, onRecoveryClick }) => {
-    const version = "v0.6.0-beta";
+    const version = "v0.7.0-beta";
 
     return (
         <footer className="w-full mt-auto py-4 px-4 sm:px-6 lg:px-8">

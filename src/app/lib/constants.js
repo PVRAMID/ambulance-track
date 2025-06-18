@@ -1,6 +1,7 @@
 // src/app/lib/constants.js
 export const APP_VERSION = "v0.5.0-beta";
 export const ENABLE_UPDATE_NOTIFICATION = false; // Toggle the update notification feature here
+export const DEV_LOGGING_ENABLED = true; // Toggle console logs for development
 export const MILEAGE_RATE = 0.45;
 export const OVERTIME_RATE_STANDARD = 1.3;
 export const OVERTIME_RATE_ENHANCED = 1.6;

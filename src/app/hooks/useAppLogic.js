@@ -1,13 +1,35 @@
 // src/app/hooks/useAppLogic.js
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { usePersistentState } from './usePersistentState';
+import { useSync } from './useSync';
+import { syncData, recoverData, deleteServerData } from './useFirebase';
 import { calculateOvertime, calculateMileage } from '../lib/calculations';
 import { sendAnalyticsEvent } from '../lib/analytics';
 import { APP_VERSION, ENABLE_UPDATE_NOTIFICATION, ALLOWANCE_CLAIM_TYPES } from '../lib/constants';
+import { WORD_LIST } from '../lib/words';
+
+function generateWordId() {
+    const sequence = [];
+    for (let i = 0; i < 3; i++) {
+        const randomIndex = Math.floor(Math.random() * WORD_LIST.length);
+        sequence.push(WORD_LIST[randomIndex]);
+    }
+    const words = sequence.map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('-');
+    const randomNumber = Math.floor(1000 + Math.random() * 9000);
+    return `${words}-${randomNumber}`;
+}
 
 export function useAppLogic() {
     // --- STATE MANAGEMENT ---
+    const [userId] = usePersistentState('actracker_userId', generateWordId());
+    const [entries, setEntries] = usePersistentState('ambulanceLogEntries_v6', {});
+    const [settings, setSettings] = usePersistentState('ambulanceLogSettings_v6', {
+        grade: '', band: '', step: '', division: '', station: '', userPostcode: ''
+    });
+    const { isSyncEnabled, setIsSyncEnabled, syncStatus, setSyncStatus } = useSync();
+    
+    // --- Other states
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(null);
     const [editingEntry, setEditingEntry] = useState(null);
@@ -21,83 +43,53 @@ export function useAppLogic() {
     const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
     const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
     const [isRecoveryModalOpen, setIsRecoveryModalOpen] = useState(false);
+    const [isSyncConfirmModalOpen, setIsSyncConfirmModalOpen] = useState(false);
     
     // Notification states
     const [showStorageWarning, setShowStorageWarning] = useState(false);
     const [showUpdateNotification, setShowUpdateNotification] = useState(false);
 
     // Persistent states
-    const [userId] = usePersistentState('actracker_userId', crypto.randomUUID());
     const [lastSeenVersion, setLastSeenVersion] = usePersistentState('actracker_lastSeenVersion', '0.0.0');
-    const [entries, setEntries] = usePersistentState('ambulanceLogEntries_v6', {});
-    const [settings, setSettings] = usePersistentState('ambulanceLogSettings_v6', {
-        grade: '', band: '', step: '', division: '', station: '', userPostcode: ''
-    });
     const [theme, setTheme] = usePersistentState('ambulanceLogTheme_v2', 'dark');
     const [sidebarView, setSidebarView] = useState('month');
     const [hasSeenWelcome, setHasSeenWelcome] = usePersistentState('hasSeenWelcome_v2', false);
 
-    // --- EFFECTS ---
-    useEffect(() => {
-        const root = window.document.documentElement;
-        root.classList.toggle('dark', theme === 'dark');
-    }, [theme]);
-
-    useEffect(() => {
-        try {
-            const testKey = 'actracker-storage-test';
-            window.localStorage.setItem(testKey, testKey);
-            window.localStorage.removeItem(testKey);
-        } catch (e) {
-            setShowStorageWarning(true);
+    // --- DATA SYNCING ---
+    const triggerSync = useCallback(async (currentEntries, currentSettings) => {
+        if (!isSyncEnabled) return;
+        setSyncStatus('pending');
+        const dataToSync = { entries: currentEntries, settings: currentSettings, lastSynced: new Date().toISOString() };
+        const result = await syncData(userId, dataToSync);
+        if (result.success) {
+            setSyncStatus('synced');
+        } else {
+            setSyncStatus('error');
         }
-        if (ENABLE_UPDATE_NOTIFICATION && lastSeenVersion !== APP_VERSION) {
-            setShowUpdateNotification(true);
-        }
-    }, [lastSeenVersion]);
+    }, [isSyncEnabled, userId, setSyncStatus]);
 
     // --- HANDLERS ---
-    const handleCloseUpdateNotification = () => {
-        setShowUpdateNotification(false);
-        setLastSeenVersion(APP_VERSION);
+    const handleToggleSync = () => {
+        const newSyncState = !isSyncEnabled;
+        setIsSyncEnabled(newSyncState);
+        if (newSyncState) {
+            triggerSync(entries, settings);
+        }
+        setIsSyncConfirmModalOpen(false);
     };
 
-    const handleOpenNewEntryModal = (day) => {
-        setSelectedDate(day);
-        setEditingEntry(null);
-        setIsEntryModalOpen(true);
-    };
-
-    const handleOpenEditEntryModal = (entry, dateString) => {
-        setSelectedDate(new Date(dateString + 'T12:00:00'));
-        setEditingEntry(entry);
-        setIsEntryModalOpen(true);
-    };
-    
-    const handleSetEditingEntry = (entry) => {
-        setEditingEntry(entry);
-    };
-
-    const handleCloseEntryModal = () => {
-        setIsEntryModalOpen(false);
-        setSelectedDate(null);
-        setEditingEntry(null);
+    const handleForceSync = () => {
+        triggerSync(entries, settings);
     };
 
     const handleSaveEntry = async (entryData) => {
         if (!selectedDate) return;
-
         let finalData = { ...entryData };
 
         if (finalData.claimType === 'Late Finish') {
-            const { overtimePay, overtimeDuration, error } = calculateOvertime(settings, finalData.overtimeHours, finalData.overtimeMinutes, finalData.isEnhancedRate);
-            if (error) {
-                alert(error);
-                finalData.overtimePay = 0;
-            } else {
-                finalData.overtimePay = overtimePay;
-                finalData.overtimeDuration = overtimeDuration;
-            }
+            const { overtimePay, overtimeDuration } = calculateOvertime(settings, finalData.overtimeHours, finalData.overtimeMinutes, finalData.isEnhancedRate);
+            finalData.overtimePay = overtimePay;
+            finalData.overtimeDuration = overtimeDuration;
         } else if (finalData.claimType === 'Mileage') {
             const { mileage, mileagePay, calculationBreakdown } = await calculateMileage(settings, finalData.workingDivision, finalData.workingStation);
             finalData.mileage = mileage;
@@ -107,49 +99,41 @@ export function useAppLogic() {
             finalData.pay = ALLOWANCE_CLAIM_TYPES[finalData.claimType].value;
         }
 
-
         const year = selectedDate.getFullYear();
         const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
         const day = String(selectedDate.getDate()).padStart(2, '0');
         const dateString = `${year}-${month}-${day}`;
-        const eventType = editingEntry ? 'Update' : 'Creation';
+        
+        const newEntries = { ...entries };
+        const dayEntries = newEntries[dateString] ? [...newEntries[dateString]] : [];
+        const entryIndex = editingEntry ? dayEntries.findIndex(e => e.id === editingEntry.id) : -1;
+        if (entryIndex > -1) {
+            dayEntries[entryIndex] = { ...finalData, id: editingEntry.id };
+        } else {
+            dayEntries.push({ id: crypto.randomUUID(), ...finalData });
+        }
+        newEntries[dateString] = dayEntries;
 
-        setEntries(prevEntries => {
-            const newEntries = { ...prevEntries };
-            const dayEntries = newEntries[dateString] ? [...newEntries[dateString]] : [];
-            const entryIndex = editingEntry ? dayEntries.findIndex(e => e.id === editingEntry.id) : -1;
-
-            if (entryIndex > -1) {
-                dayEntries[entryIndex] = { ...finalData, id: editingEntry.id };
-            } else {
-                dayEntries.push({ id: crypto.randomUUID(), ...finalData });
-            }
-            newEntries[dateString] = dayEntries;
-            return newEntries;
-        });
-
-        sendAnalyticsEvent(eventType, finalData, userId);
+        setEntries(newEntries);
+        triggerSync(newEntries, settings);
+        
+        sendAnalyticsEvent(editingEntry ? 'Update' : 'Creation', finalData, userId);
         handleCloseEntryModal();
     };
 
     const confirmDelete = () => {
         if (!deleteRequest) return;
         const { entryId, dateString } = deleteRequest;
-        const entryToDelete = entries[dateString]?.find(e => e.id === entryId);
+        
+        const newEntries = { ...entries };
+        let dayEntries = newEntries[dateString] || [];
+        const entryToDelete = dayEntries.find(e => e.id === entryId);
+        if (entryToDelete) sendAnalyticsEvent('Deletion', entryToDelete, userId);
+        newEntries[dateString] = dayEntries.filter(e => e.id !== entryId);
+        if (newEntries[dateString].length === 0) delete newEntries[dateString];
 
-        setEntries(prevEntries => {
-            const newEntries = { ...prevEntries };
-            let dayEntries = newEntries[dateString] || [];
-            newEntries[dateString] = dayEntries.filter(e => e.id !== entryId);
-            if (newEntries[dateString].length === 0) {
-                delete newEntries[dateString];
-            }
-            return newEntries;
-        });
-
-        if (entryToDelete) {
-            sendAnalyticsEvent('Deletion', entryToDelete, userId);
-        }
+        setEntries(newEntries);
+        triggerSync(newEntries, settings);
 
         setDeleteRequest(null);
         handleCloseEntryModal();
@@ -157,23 +141,40 @@ export function useAppLogic() {
 
     const handleSaveSettings = (newSettings) => {
         setSettings(newSettings);
+        triggerSync(entries, newSettings);
         setIsSettingsModalOpen(false);
     };
 
+    const handleRecoverData = async (code) => {
+        const result = await recoverData(code);
+        if (result.success) {
+            setEntries(result.data.entries || {});
+            setSettings(result.data.settings || {});
+            alert('Recovery successful!');
+            setIsRecoveryModalOpen(false);
+        } else {
+            alert(result.error);
+        }
+    };
+    
+    const handleDeleteServerData = async () => {
+        const result = await deleteServerData(userId);
+        if (result.success) {
+            alert('Your server data has been permanently deleted.');
+        } else {
+            alert(result.error);
+        }
+    };
+    
+    const handleCloseUpdateNotification = () => setShowUpdateNotification(false);
+    const handleOpenNewEntryModal = (day) => { setSelectedDate(day); setEditingEntry(null); setIsEntryModalOpen(true); };
+    const handleOpenEditEntryModal = (entry, dateString) => { setSelectedDate(new Date(dateString + 'T12:00:00')); setEditingEntry(entry); setIsEntryModalOpen(true); };
+    const handleSetEditingEntry = (entry) => setEditingEntry(entry);
+    const handleCloseEntryModal = () => { setIsEntryModalOpen(false); setSelectedDate(null); setEditingEntry(null); };
+
+
     return {
-        // State
-        currentDate,
-        selectedDate,
-        editingEntry,
-        breakdownEntry,
-        deleteRequest,
-        entries,
-        settings,
-        theme,
-        sidebarView,
-        hasSeenWelcome,
-        userId,
-        // Modal and Notification visibility
+        currentDate, selectedDate, editingEntry, breakdownEntry, deleteRequest, entries, settings, theme, sidebarView, hasSeenWelcome, userId, isSyncEnabled, syncStatus,
         modals: {
             entry: { isOpen: isEntryModalOpen, open: handleOpenNewEntryModal, close: handleCloseEntryModal, openEdit: handleOpenEditEntryModal },
             settings: { isOpen: isSettingsModalOpen, open: () => setIsSettingsModalOpen(true), close: () => setIsSettingsModalOpen(false) },
@@ -183,19 +184,9 @@ export function useAppLogic() {
             about: { isOpen: isAboutModalOpen, open: () => setIsAboutModalOpen(true), close: () => setIsAboutModalOpen(false) },
             delete: { isOpen: !!deleteRequest, open: setDeleteRequest, close: () => setDeleteRequest(null) },
             recovery: { isOpen: isRecoveryModalOpen, open: () => setIsRecoveryModalOpen(true), close: () => setIsRecoveryModalOpen(false) },
+            syncConfirm: { isOpen: isSyncConfirmModalOpen, open: () => setIsSyncConfirmModalOpen(true), close: () => setIsSyncConfirmModalOpen(false) },
         },
-        notifications: {
-            storage: { isOpen: showStorageWarning, close: () => setShowStorageWarning(false) },
-            update: { isOpen: showUpdateNotification, close: handleCloseUpdateNotification, version: APP_VERSION },
-        },
-        // Handlers
-        setCurrentDate,
-        setSidebarView,
-        setTheme,
-        setHasSeenWelcome,
-        handleSaveEntry,
-        handleSetEditingEntry,
-        confirmDelete,
-        handleSaveSettings,
+        notifications: { storage: { isOpen: showStorageWarning, close: () => setShowStorageWarning(false) }, update: { isOpen: showUpdateNotification, close: handleCloseUpdateNotification, version: APP_VERSION },},
+        setCurrentDate, setSidebarView, setTheme, setHasSeenWelcome, handleSaveEntry, handleSetEditingEntry, confirmDelete, handleSaveSettings, handleToggleSync, handleRecoverData, handleDeleteServerData, handleForceSync
     };
 }

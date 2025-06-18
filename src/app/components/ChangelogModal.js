@@ -6,6 +6,20 @@ import { X } from 'lucide-react';
 
 const changelogData = [
      {
+        version: "v0.7.0-beta",
+        date: "2025-06-18",
+        changes: [
+            { type: "feat", text: "RECOVERY: A user can now keep a note of their user ID, this can be found in the 'About' section at the bottom of the page. In the event where a new device needs to be used, or in the event a loss of data occurs, the user can recover data if they have syncing enabled on the application." },
+            { type: "feat", text: "SYNCING: A user can now enable syncing, data submitted into the app, along with all settings are stored in a firebase database, this can be enabled/disabled if a user wishes to keep their data on their device. The user is able to delete their own data from the server by entering 'Recovery' and selecting 'Detete my Data'."},
+            { type: "feat", text: "A user can now force sync to the database using the arrows next to the sync status button." },
+            { type: "feat", text: "A user can disable syncing by clicking on the sync button and confirming disable sync in the dialogue box." },
+            { type: "backend", text: "Implemented Firebase integration for data storing/management." },
+            { type: "ui", text: "Feedback button is now an icon instead of a text based button." },
+            { type: "ui", text: "Syncing progress is now an icon in the header." },
+            
+        ]
+    },
+     {
         version: "v0.6.2-beta",
         date: "2025-06-17",
         changes: [

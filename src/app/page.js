@@ -13,13 +13,13 @@ import FeedbackModal from './components/FeedbackModal';
 import ChangelogModal from './components/ChangelogModal';
 import AboutModal from './components/AboutModal';
 import RecoveryModal from './components/RecoveryModal';
+import SyncConfirmationModal from './components/SyncConfirmationModal';
 import StorageWarning from './components/StorageWarning';
 import UpdateNotification from './components/UpdateNotification';
 import Modal from './components/Modal';
 import ClientOnly from './components/ClientOnly';
 import Footer from './components/Footer';
-import { useAppLogic } from './hooks/useAppLogic'; // Import the new master hook
-import { sendAnalyticsEvent } from './lib/analytics'; // Keep for feedback
+import { useAppLogic } from './hooks/useAppLogic';
 
 export default function Home() {
     const {
@@ -33,6 +33,8 @@ export default function Home() {
         sidebarView,
         hasSeenWelcome,
         userId,
+        isSyncEnabled,
+        syncStatus,
         modals,
         notifications,
         setCurrentDate,
@@ -43,6 +45,10 @@ export default function Home() {
         handleSetEditingEntry,
         confirmDelete,
         handleSaveSettings,
+        handleToggleSync,
+        handleRecoverData,
+        handleDeleteServerData,
+        handleForceSync
     } = useAppLogic();
 
     const handleSendFeedback = async ({ feedbackType, details, name, screenshot }) => {
@@ -167,6 +173,10 @@ export default function Home() {
                                 onSettingsClick={modals.settings.open}
                                 onFeedbackClick={modals.feedback.open}
                                 onRecoveryClick={modals.recovery.open}
+                                onSyncToggleClick={modals.syncConfirm.open}
+                                onForceSyncClick={handleForceSync}
+                                isSyncEnabled={isSyncEnabled}
+                                syncStatus={syncStatus}
                                 theme={theme} 
                                 setTheme={setTheme}
                             />
@@ -209,8 +219,15 @@ export default function Home() {
                         isOpen={modals.recovery.isOpen}
                         onClose={modals.recovery.close}
                         recoveryId={userId}
-                        onRecover={() => alert("Recovery logic not yet implemented.")}
-                        onDelete={() => alert("Delete logic not yet implemented.")}
+                        onRecover={handleRecoverData}
+                        onDelete={handleDeleteServerData}
+                    />
+
+                    <SyncConfirmationModal 
+                        isOpen={modals.syncConfirm.isOpen}
+                        onClose={modals.syncConfirm.close}
+                        onConfirm={handleToggleSync}
+                        isSyncEnabled={isSyncEnabled}
                     />
 
                     <FeedbackModal
