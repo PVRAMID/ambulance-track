@@ -107,6 +107,7 @@ export const DIVISIONS_AND_STATIONS = {
         { name: 'Grimsby Ambulance Station', postcode: 'DN31 2RL' },
         { name: 'Scunthorpe Ambulance Station', postcode: 'DN15 6AL' },
         { name: 'Spalding Ambulance Station', postcode: 'PE11 3DT' },
+        { name: 'Market Rasen', postcode: 'LN8 3HZ' },
     ]
 };
 
