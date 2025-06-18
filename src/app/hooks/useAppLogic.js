@@ -44,6 +44,7 @@ export function useAppLogic() {
     const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
     const [isRecoveryModalOpen, setIsRecoveryModalOpen] = useState(false);
     const [isSyncConfirmModalOpen, setIsSyncConfirmModalOpen] = useState(false);
+    const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
     
     // Notification states
     const [showStorageWarning, setShowStorageWarning] = useState(false);
@@ -185,6 +186,7 @@ export function useAppLogic() {
             delete: { isOpen: !!deleteRequest, open: setDeleteRequest, close: () => setDeleteRequest(null) },
             recovery: { isOpen: isRecoveryModalOpen, open: () => setIsRecoveryModalOpen(true), close: () => setIsRecoveryModalOpen(false) },
             syncConfirm: { isOpen: isSyncConfirmModalOpen, open: () => setIsSyncConfirmModalOpen(true), close: () => setIsSyncConfirmModalOpen(false) },
+            info: { isOpen: isInfoModalOpen, open: () => setIsInfoModalOpen(true), close: () => setIsInfoModalOpen(false) },
         },
         notifications: { storage: { isOpen: showStorageWarning, close: () => setShowStorageWarning(false) }, update: { isOpen: showUpdateNotification, close: handleCloseUpdateNotification, version: APP_VERSION },},
         setCurrentDate, setSidebarView, setTheme, setHasSeenWelcome, handleSaveEntry, handleSetEditingEntry, confirmDelete, handleSaveSettings, handleToggleSync, handleRecoverData, handleDeleteServerData, handleForceSync

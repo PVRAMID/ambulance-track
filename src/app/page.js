@@ -16,6 +16,7 @@ import RecoveryModal from './components/RecoveryModal';
 import SyncConfirmationModal from './components/SyncConfirmationModal';
 import StorageWarning from './components/StorageWarning';
 import UpdateNotification from './components/UpdateNotification';
+import InformationModal from './components/InformationModal';
 import Modal from './components/Modal';
 import ClientOnly from './components/ClientOnly';
 import Footer from './components/Footer';
@@ -252,6 +253,11 @@ export default function Home() {
                         onClose={modals.breakdown.close}
                         entry={breakdownEntry}
                     />
+
+                       <InformationModal
+                            isOpen={modals.info.isOpen}
+                            onClose={modals.info.close}
+                        />
                     
                     <Modal isOpen={modals.delete.isOpen} onClose={modals.delete.close}>
                         <div className="p-6">
@@ -269,6 +275,7 @@ export default function Home() {
                 onChangelogClick={modals.changelog.open}
                 onAboutClick={modals.about.open}
                 onRecoveryClick={modals.recovery.open}
+                onInfoClick={modals.info.open}
             />
         </div>
     );
