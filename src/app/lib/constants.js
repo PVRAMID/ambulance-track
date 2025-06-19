@@ -77,6 +77,8 @@ export const DIVISIONS_AND_STATIONS = {
         { name: 'Buxton Ambulance Station', postcode: 'SK17 6SN' },
         { name: 'Bakewell Ambulance Station', postcode: 'DE45 1AB' },
         { name: 'Swadlincote Ambulance Station', postcode: 'DE11 0AE' },
+        { name: 'Eckington Ambulance Station', postcode: 'S21 4AY' },
+        { name: 'Alfreton Ambulance Station', postcode: 'DE55 7EG' },
     ],
     "Leicestershire": [
         { name: 'Gorse Hill Ambulance Station', postcode: 'LE7 7GL' },

@@ -10,7 +10,7 @@ const changelogData = [
         date: "2025-06-19",
         changes: [
             { type: "fix", text: "Feedback form has been fixed, included section for reporting missing stations." },
-            
+            { type: "fix", text: "Added Eckington, Alfreton Ambulance Stations." },
         ]
     },
     {
