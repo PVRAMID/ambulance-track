@@ -6,6 +6,14 @@ import { X } from 'lucide-react';
 
 const changelogData = [
     {
+        version: "v0.8.1-beta",
+        date: "2025-06-19",
+        changes: [
+            { type: "fix", text: "Feedback form has been fixed, included section for reporting missing stations." },
+            
+        ]
+    },
+    {
         version: "v0.8.0-beta",
         date: "2025-06-18",
         changes: [
