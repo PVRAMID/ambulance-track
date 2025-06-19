@@ -11,6 +11,7 @@ const changelogData = [
         changes: [
             { type: "fix", text: "Feedback form has been fixed, included section for reporting missing stations." },
             { type: "fix", text: "Added Eckington, Alfreton Ambulance Stations." },
+            { type: "ui", text: "Added a Favicon replacement for the Vercel Icon. Created with love by Adam Norris." },
         ]
     },
     {
