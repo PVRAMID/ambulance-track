@@ -45,6 +45,7 @@ const FeedbackModal = ({ isOpen, onClose, onSubmit }) => {
                         <option>Suggestion</option>
                         <option>Bug</option>
                         <option>General Feedback</option>
+                        <option>Missing Station</option>
                     </select>
                 </div>
 
