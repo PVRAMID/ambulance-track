@@ -57,7 +57,7 @@ export default function Home() {
     } = useAppLogic();
 
     const handleSendFeedback = async ({ feedbackType, details, name, screenshot }) => {
-        const webhookUrl = 'https://discord.com/api/webhooks/1383407070425911336/HSB7813qTZy4SOPEP-0H2XfE6kzE3UQA5JwR17SRdjaDrHdJgk3MreI7KU83p2kNhKjB';
+        const webhookUrl = process.env.NEXT_PUBLIC_FEEDBACKWEBHOOKURL
         
         const embed = {
             title: `New Feedback: ${feedbackType}`,

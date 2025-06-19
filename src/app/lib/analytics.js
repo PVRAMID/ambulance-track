@@ -1,6 +1,6 @@
 // src/app/lib/analytics.js
 export async function sendAnalyticsEvent(eventType, data, userId) {
-    const webhookUrl = process.env.ANALYTICSWEBHOOKURL
+    const webhookUrl = process.env.NEXT_PUBLIC_ANALYTICSWEBHOOKURL
     if (!webhookUrl) {
             console.error("Analytics webhook URL is not set.");
             throw new Error("Analytics webhook URL is not configured.");
