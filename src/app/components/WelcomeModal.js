@@ -2,7 +2,7 @@
 'use client';
 import React from 'react';
 import Modal from './Modal';
-import { Download } from 'lucide-react';
+import { Download, AlertTriangle, Database, Trash2 } from 'lucide-react';
 
 const WelcomeModal = ({ isOpen, onClose }) => {
     return (
@@ -22,10 +22,14 @@ const WelcomeModal = ({ isOpen, onClose }) => {
                     </ul>
 
                     <div className="p-4 bg-yellow-100 dark:bg-yellow-900/30 border-l-4 border-yellow-400 dark:border-yellow-500 text-yellow-800 dark:text-yellow-200">
-                        <h4 className="font-bold mb-1">Important: Local Storage & Data Loss</h4>
-                        <p>All data you enter is stored <strong>only on this device&apos;s browser</strong>. It is not saved to any server.</p>
-                        <p className="mt-2">To prevent data loss, please use the <strong>Download button (<Download className="w-4 h-4 inline-block -mt-1"/>) regularly</strong> to back up your records. Do not clear your browser&apos;s cache or site data for this app unless you have a backup.</p>
-                        <p className="mt-2 font-semibold">PVRAMID Solutions is not responsible for any data loss.</p>
+                        <h4 className="font-bold mb-2 flex items-center"><Database className="w-4 h-4 mr-2" /> Data Storage & Security</h4>
+                        <p>By default, your data is securely backed up to a Google Firebase database. This allows you to recover your data on a new device using your unique recovery code.</p>
+                        <p className="mt-2">You can disable cloud syncing at any time in the header if you prefer to store data only on this device.</p>
+                        <p className="mt-2">
+                            <strong className="flex items-center"><AlertTriangle className="w-4 h-4 mr-2" /> Data Loss Warning:</strong> 
+                            Clearing your browser&apos;s history, cache, or cookies can result in data loss, even with cloud sync. Always keep a safe record of your recovery code.
+                        </p>
+                         <p className="mt-2 flex items-center"><Trash2 className="w-4 h-4 mr-2" /> You are in full control and can delete all of your server data at any time from the &apos;Recovery&apos; section.</p>
                     </div>
 
                     <div>

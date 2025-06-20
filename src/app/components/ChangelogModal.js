@@ -10,6 +10,7 @@ const changelogData = [
         date: "2025-06-19",
         changes: [
             { type: "feat", text: "SUGGESTION IMPLEMENTED: When submitting a late finish, you can now designate the time you finished, allowing you to submit a timesheet OT entry without opening the tracker entry. (Suggestion from Mercedes B!)" },
+            { type: "ui", text: "Edited the welcome screen for new users to correctly explain data storage, privacy and data control." },
         ]
     },
     {
