@@ -2,6 +2,7 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
 import Modal from './Modal';
+import Image from 'next/image';
 import { X, Users, Megaphone, UserPlus, Trash2, Edit, ChevronDown, ChevronUp, Save } from 'lucide-react';
 import {
     getAllUsers,
@@ -159,13 +160,13 @@ const AdminModal = ({ isOpen, onClose, user }) => {
     
     const handleUserSelect = (userToSelect) => {
         if (selectedUser && selectedUser.id === userToSelect.id) {
-            setSelectedUser(null);
+            setSelectedUser(null); // Toggle off if already selected
             setIsEditingUser(false);
         } else {
             setSelectedUser(userToSelect);
             setIsEditingUser(false); // Always start in view mode
         }
-    };
+    }
 
     const handleEditUserSettings = () => {
         setEditableSettings({ ...selectedUser.settings });
@@ -301,7 +302,7 @@ const AdminModal = ({ isOpen, onClose, user }) => {
                                                  <div className="mt-6 flex justify-end">
                                                     <button onClick={() => handleDeleteClick('user', u.id, u.id)} className="flex items-center space-x-2 px-3 py-1.5 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">
                                                         <Trash2 size={14}/>
-                                                        <span>Remove User's Data</span>
+                                                        <span>Remove User&apos;s Data</span>
                                                     </button>
                                                 </div>
                                             </div>
@@ -326,7 +327,7 @@ const AdminModal = ({ isOpen, onClose, user }) => {
                                 <div className="space-y-3">
                                     {announcements.map(ann => (
                                         <div key={ann.id} className="p-3 bg-gray-50 dark:bg-gray-700/40 rounded-lg">
-                                            {ann.imageUrl && <img src={ann.imageUrl} alt="Announcement" className="rounded-md mb-2 max-h-48 w-full object-cover" />}
+                                            {ann.imageUrl && <Image src={ann.imageUrl} alt="Announcement" width={400} height={200} unoptimized className="rounded-md mb-2 max-h-48 w-full object-cover" />}
                                             <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{ann.content}</p>
                                             <div className="flex items-center justify-between mt-2">
                                                 <p className="text-xs text-gray-500 dark:text-gray-400">By {ann.author} on {formatDate(ann.timestamp)}</p>
