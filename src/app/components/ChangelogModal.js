@@ -6,6 +6,13 @@ import { X } from 'lucide-react';
 
 const changelogData = [
     {
+        version: "v0.8.2-beta",
+        date: "2025-06-19",
+        changes: [
+            { type: "feat", text: "SUGGESTION IMPLEMENTED: When submitting a late finish, you can now designate the time you finished, allowing you to submit a timesheet OT entry without opening the tracker entry. (Suggestion from Mercedes B!)" },
+        ]
+    },
+    {
         version: "v0.8.1-beta",
         date: "2025-06-19",
         changes: [
