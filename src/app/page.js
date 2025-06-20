@@ -1,3 +1,4 @@
+// src/app/page.js
 'use client';
 
 import React from 'react';
@@ -17,6 +18,7 @@ import SyncConfirmationModal from './components/SyncConfirmationModal';
 import StorageWarning from './components/StorageWarning';
 import UpdateNotification from './components/UpdateNotification';
 import InformationModal from './components/InformationModal';
+import AdminModal from './components/AdminModal'; // Import AdminModal
 import Modal from './components/Modal';
 import ClientOnly from './components/ClientOnly';
 import AnnouncementsModal from './components/AnnouncementsModal';
@@ -41,6 +43,8 @@ export default function Home() {
         notifications,
         hasUnread,
         announcements,
+        user, // Get user state
+        handleAdminAction, // Get admin action handler
         handleMarkAnnouncementsAsRead,
         setCurrentDate,
         setSidebarView,
@@ -254,6 +258,12 @@ export default function Home() {
                         userId={userId}
                     />
 
+                     <AdminModal
+                        isOpen={modals.admin.isOpen}
+                        onClose={modals.admin.close}
+                        user={user}
+                    />
+
                     <AnnouncementsModal
                         isOpen={modals.announcements.isOpen}
                         onClose={modals.announcements.close}
@@ -289,6 +299,7 @@ export default function Home() {
                 onAboutClick={modals.about.open}
                 onRecoveryClick={modals.recovery.open}
                 onInfoClick={modals.info.open}
+                handleAdminAction={handleAdminAction}
             />
         </div>
     );

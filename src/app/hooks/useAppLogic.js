@@ -1,8 +1,17 @@
+// src/app/hooks/useAppLogic.js
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { usePersistentState } from './usePersistentState';
 import { useSync } from './useSync';
-import { syncData, recoverData, deleteServerData, getAnnouncements } from './useFirebase';
+import { 
+    syncData, 
+    recoverData, 
+    deleteServerData, 
+    getAnnouncements,
+    checkIfAdmin,
+    // Admin functions are called directly from the modal now
+} from './useFirebase';
+import { auth, onAuthStateChanged, googleProvider, signInWithPopup } from '../lib/firebase';
 import { calculateOvertime, calculateMileage } from '../lib/calculations';
 import { sendAnalyticsEvent } from '../lib/analytics';
 import { APP_VERSION, ENABLE_UPDATE_NOTIFICATION, ALLOWANCE_CLAIM_TYPES } from '../lib/constants';
@@ -42,6 +51,7 @@ export function useAppLogic() {
     const [isSyncConfirmModalOpen, setIsSyncConfirmModalOpen] = useState(false);
     const [isAnnouncementsModalOpen, setIsAnnouncementsModalOpen] = useState(false);
     const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+    const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
     
     const [showStorageWarning, setShowStorageWarning] = useState(false);
     const [showUpdateNotification, setShowUpdateNotification] = useState(false);
@@ -55,8 +65,45 @@ export function useAppLogic() {
     const [sidebarView, setSidebarView] = useState('month');
     const [hasSeenWelcome, setHasSeenWelcome] = usePersistentState('hasSeenWelcome_v2', false);
 
+    const [user, setUser] = useState(null);
+    const [isAdmin, setIsAdmin] = useState(false);
+
     useEffect(() => {
-        const fetchAnnouncements = async () => {
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+            setUser(currentUser);
+            if (currentUser) {
+                const adminStatus = await checkIfAdmin(currentUser.uid);
+                setIsAdmin(adminStatus);
+            } else {
+                setIsAdmin(false);
+            }
+        });
+        return () => unsubscribe();
+    }, []);
+
+    const handleAdminAction = async () => {
+        if (user && isAdmin) {
+            setIsAdminModalOpen(true);
+        } else {
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                const loggedInUser = result.user;
+                const adminStatus = await checkIfAdmin(loggedInUser.uid);
+                setIsAdmin(adminStatus);
+                if (adminStatus) {
+                    setIsAdminModalOpen(true);
+                } else {
+                    alert('You are not authorized to access the admin panel.');
+                }
+            } catch (error) {
+                console.error("Admin login failed:", error);
+                alert("Admin login failed. Please try again.");
+            }
+        }
+    };
+
+    useEffect(() => {
+        const fetchAnnouncementsData = async () => {
             const result = await getAnnouncements();
             if (result.success) {
                 setAnnouncements(result.data);
@@ -65,7 +112,7 @@ export function useAppLogic() {
                 }
             }
         };
-        fetchAnnouncements();
+        fetchAnnouncementsData();
     }, [lastReadAnnouncement]);
 
     const handleMarkAnnouncementsAsRead = () => {
@@ -191,7 +238,9 @@ export function useAppLogic() {
     const handleCloseEntryModal = () => { setIsEntryModalOpen(false); setSelectedDate(null); setEditingEntry(null); };
 
     return {
-        currentDate, selectedDate, editingEntry, breakdownEntry, deleteRequest, entries, settings, theme, sidebarView, hasSeenWelcome, userId, isSyncEnabled, syncStatus,
+        currentDate, selectedDate, editingEntry, breakdownEntry, deleteRequest, entries, settings, theme, sidebarView, hasSeenWelcome, userId, isSyncEnabled, syncStatus, user,
+        isAdmin,
+        handleAdminAction,
         hasUnread,
         announcements,
         handleMarkAnnouncementsAsRead,
@@ -207,6 +256,7 @@ export function useAppLogic() {
             syncConfirm: { isOpen: isSyncConfirmModalOpen, open: () => setIsSyncConfirmModalOpen(true), close: () => setIsSyncConfirmModalOpen(false) },
             announcements: { isOpen: isAnnouncementsModalOpen, open: () => setIsAnnouncementsModalOpen(true), close: () => setIsAnnouncementsModalOpen(false) },
             info: { isOpen: isInfoModalOpen, open: () => setIsInfoModalOpen(true), close: () => setIsInfoModalOpen(false) },
+            admin: { isOpen: isAdminModalOpen, open: () => setIsAdminModalOpen(true), close: () => setIsAdminModalOpen(false)},
         },
         notifications: { storage: { isOpen: showStorageWarning, close: () => setShowStorageWarning(false) }, update: { isOpen: showUpdateNotification, close: handleCloseUpdateNotification, version: APP_VERSION },},
         setCurrentDate, setSidebarView, setTheme, setHasSeenWelcome, handleSaveEntry, handleSetEditingEntry, confirmDelete, handleSaveSettings, handleToggleSync, handleRecoverData, handleDeleteServerData, handleForceSync

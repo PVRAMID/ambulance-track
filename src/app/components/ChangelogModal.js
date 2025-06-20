@@ -6,6 +6,13 @@ import { X } from 'lucide-react';
 
 const changelogData = [
     {
+        version: "v0.8.3-beta",
+        date: "2025-06-19",
+        changes: [
+            { type: "feat", text: "Built admin panel to add remote support possibilities." },
+        ]
+    },
+    {
         version: "v0.8.2-beta",
         date: "2025-06-19",
         changes: [

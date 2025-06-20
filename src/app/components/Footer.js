@@ -2,8 +2,8 @@
 'use client';
 import React from 'react';
 
-const Footer = ({ onChangelogClick, onAboutClick, onRecoveryClick, onInfoClick }) => {
-    const version = "v0.8.2-beta";
+const Footer = ({ onChangelogClick, onAboutClick, onRecoveryClick, onInfoClick, handleAdminAction }) => {
+    const version = "v0.8.3-beta";
 
     return (
         <footer className="w-full mt-auto py-4 px-4 sm:px-6 lg:px-8">
@@ -21,6 +21,9 @@ const Footer = ({ onChangelogClick, onAboutClick, onRecoveryClick, onInfoClick }
                     </button>
                     <button onClick={onRecoveryClick} className="hover:underline text-blue-600 dark:text-blue-400">
                         Recovery
+                    </button>
+                    <button onClick={handleAdminAction} className="hover:underline text-red-600 dark:text-red-400">
+                        Admin
                     </button>
                 </div>
             </div>
