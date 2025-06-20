@@ -1,7 +1,7 @@
 // pvramid/ambulance-track/ambulance-track-1d0d37eaed18867f1ddff8bf2aff81949149a05b/src/app/components/EntriesSidebar.js
 'use client';
 import React, { useMemo } from 'react';
-import { Clock, Info, Edit } from 'lucide-react';
+import { Clock, Info, Edit, AlarmClockOff } from 'lucide-react';
 
 const EntriesSidebar = ({ entries, onEdit, onShowBreakdown, view, setView, currentDate }) => {
     const sortedEntries = useMemo(() => {
@@ -39,8 +39,19 @@ const EntriesSidebar = ({ entries, onEdit, onShowBreakdown, view, setView, curre
                                 <p className="font-bold text-sm text-blue-600 dark:text-blue-400">{entry.claimType}</p>
                                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{new Date(entry.date + 'T12:00:00').toLocaleDateString()}</p>
                                 <p className="text-sm text-gray-800 dark:text-gray-200 mt-2">Callsign: {entry.callsign}</p>
-                                {entry.claimType === 'Late Finish' && entry.overtimeDuration > 0 && (
-                                    <div className="text-xs text-yellow-800 dark:text-yellow-400 mt-1.5 flex items-center font-medium"><Clock className="w-3.5 h-3.5 mr-1.5" /> {Math.floor(entry.overtimeDuration/60)}h {entry.overtimeDuration % 60}m (~£{entry.overtimePay?.toFixed(2)})</div>
+                                {entry.claimType === 'Late Finish' && (
+                                    <>
+                                        {entry.overtimeDuration > 0 && (
+                                            <div className="text-xs text-yellow-800 dark:text-yellow-400 mt-1.5 flex items-center font-medium">
+                                                <Clock className="w-3.5 h-3.5 mr-1.5" /> {Math.floor(entry.overtimeDuration/60)}h {entry.overtimeDuration % 60}m (~£{entry.overtimePay?.toFixed(2)})
+                                            </div>
+                                        )}
+                                        {entry.endOfShiftTime && (
+                                             <div className="text-xs text-red-600 dark:text-red-400 mt-1.5 flex items-center font-medium">
+                                                 <AlarmClockOff className="w-3.5 h-3.5 mr-1.5" /> End of Shift: {entry.endOfShiftTime}
+                                             </div>
+                                        )}
+                                    </>
                                 )}
                                 {entry.claimType === 'Mileage' && (
                                      <p className="text-xs text-green-800 dark:text-green-400 mt-1.5 font-medium">Claim: {parseFloat(entry.mileage).toFixed(2)} miles (~£{entry.mileagePay?.toFixed(2)})</p>

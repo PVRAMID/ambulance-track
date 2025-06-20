@@ -28,6 +28,7 @@ const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingE
             claimType: '', callsign: '', incidentNumber: '', details: '', 
             overtimeHours: '0', overtimeMinutes: '0', isEnhancedRate: dayIsSunday || dayIsBankHoliday,
             workingDivision: '', workingStation: '', mileage: '', mileagePay: 0,
+            endOfShiftTime: '', // Added field
             ...existingEntry
         };
         
@@ -37,7 +38,19 @@ const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingE
     
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value.toUpperCase() }));
+        
+        if (type === 'checkbox') {
+            setFormData(prev => ({ ...prev, [name]: checked }));
+            return;
+        }
+
+        // Only convert specific fields to uppercase
+        const upperCaseFields = ['callsign', 'incidentNumber'];
+        if (upperCaseFields.includes(name)) {
+             setFormData(prev => ({ ...prev, [name]: value.toUpperCase() }));
+        } else {
+             setFormData(prev => ({ ...prev, [name]: value }));
+        }
     };
 
     const handleSelectChange = (e) => {
@@ -59,7 +72,7 @@ const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingE
             newErrors.callsign = "Callsign is required";
         }
 
-        const requiresIncidentNumber = ['Disturbed Rest Break'];
+        const requiresIncidentNumber = ['Late Finish', 'Late Rest Break', 'No Rest Break', 'Disturbed Rest Break'];
         if (requiresIncidentNumber.includes(formData.claimType) && !formData.incidentNumber) {
             newErrors.incidentNumber = "Incident number is required";
         }
@@ -166,6 +179,17 @@ const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingE
                                         ))}
                                     </select>
                                 </div>
+                            </div>
+                            <div>
+                                <label htmlFor="endOfShiftTime" className="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-1.5">End of Shift Time (Optional)</label>
+                                <input
+                                    type="time"
+                                    id="endOfShiftTime"
+                                    name="endOfShiftTime"
+                                    value={formData.endOfShiftTime || ''}
+                                    onChange={handleChange}
+                                    className="w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-gray-900 dark:text-gray-100"
+                                />
                             </div>
                             <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-500/30 rounded-lg text-yellow-800 dark:text-yellow-200 text-xs flex items-start space-x-2">
                                 <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
