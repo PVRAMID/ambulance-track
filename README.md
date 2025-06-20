@@ -1,3 +1,5 @@
+*Note - This project is not for public use, public hosting or to be edited. The source code is visible for educational purposes only. Recreating, selling or using this for any reason other than personal knowledge is prohibited.*
+
 # Welcome to ACTracker! 🚑
 
 Hello, and welcome to the Ambulance Claim Tracker (ACTracker)! This guide is here to walk you through everything you need to know to get started and make the most of the app.
