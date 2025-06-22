@@ -1,13 +1,15 @@
+// src/app/components/MonthlyEarnings.js
 'use client';
 import React, { useMemo } from 'react';
 import { ALLOWANCE_CLAIM_TYPES } from '../lib/constants';
 import { Coffee } from 'lucide-react';
 
 const MonthlyEarnings = ({ currentDate, entries }) => {
-    const { overtimeTotal, mileageTotal, allowanceBreakdown, grandTotal } = useMemo(() => {
+    const { plannedOvertimeTotal, eosOvertimeTotal, mileageTotal, allowanceBreakdown, grandTotal } = useMemo(() => {
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
-        let overtimeTotal = 0;
+        let plannedOvertimeTotal = 0;
+        let eosOvertimeTotal = 0;
         let mileageTotal = 0;
         const allowanceBreakdown = Object.fromEntries(
             Object.keys(ALLOWANCE_CLAIM_TYPES).map(key => [key, 0])
@@ -18,7 +20,9 @@ const MonthlyEarnings = ({ currentDate, entries }) => {
             if (entryDate.getFullYear() === year && entryDate.getMonth() === month) {
                 dayEntries.forEach(entry => {
                     if (entry.claimType === 'Late Finish') {
-                        overtimeTotal += entry.overtimePay || 0;
+                        eosOvertimeTotal += entry.overtimePay || 0;
+                    } else if (entry.claimType === 'Overtime Shift') {
+                        plannedOvertimeTotal += entry.overtimePay || 0;
                     } else if (entry.claimType === 'Mileage') {
                         mileageTotal += entry.mileagePay || 0;
                     } else if (entry.claimType in ALLOWANCE_CLAIM_TYPES) {
@@ -29,16 +33,17 @@ const MonthlyEarnings = ({ currentDate, entries }) => {
         });
 
         const allowanceTotal = Object.values(allowanceBreakdown).reduce((a, b) => a + b, 0);
-        const grandTotal = overtimeTotal + mileageTotal + allowanceTotal;
+        const grandTotal = plannedOvertimeTotal + eosOvertimeTotal + mileageTotal + allowanceTotal;
 
-        return { overtimeTotal, mileageTotal, allowanceBreakdown, grandTotal };
+        return { plannedOvertimeTotal, eosOvertimeTotal, mileageTotal, allowanceBreakdown, grandTotal };
     }, [currentDate, entries]);
 
     return (
         <div className="mt-8 bg-white dark:bg-gray-800/40 border border-gray-200 dark:border-gray-700/60 rounded-xl p-6 shadow-lg">
             <h3 className="font-bold text-lg text-gray-800 dark:text-white mb-4"><strong>Estimated</strong> Earnings for {currentDate.toLocaleString('default', { month: 'long' })}</h3>
             <div className="space-y-3 text-sm">
-                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-gray-300">Total Overtime:</span><span className="font-mono text-gray-900 dark:text-gray-100 font-semibold">£{overtimeTotal.toFixed(2)}</span></div>
+                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-gray-300">Overtime (EOS):</span><span className="font-mono text-gray-900 dark:text-gray-100 font-semibold">£{eosOvertimeTotal.toFixed(2)}</span></div>
+                <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-gray-300">Planned Overtime:</span><span className="font-mono text-gray-900 dark:text-gray-100 font-semibold">£{plannedOvertimeTotal.toFixed(2)}</span></div>
                 <div className="flex justify-between items-center"><span className="text-gray-600 dark:text-gray-300">Total Mileage:</span><span className="font-mono text-gray-900 dark:text-gray-100 font-semibold">£{mileageTotal.toFixed(2)}</span></div>
                 
                 {Object.entries(allowanceBreakdown).map(([type, total]) => {

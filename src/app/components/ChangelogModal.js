@@ -6,6 +6,19 @@ import { X } from 'lucide-react';
 
 const changelogData = [
     {
+        version: "v0.9.0-beta",
+        date: "2025-06-22",
+        changes: [
+            { type: "feat", text: "Full overtime shift added to entries. (Suggestion by: Mercedes B)" },
+            { type: "feat", text: "Essential Education/Education days added to entries. (Suggestion by: Mercedes B)" },
+            { type: "feat", text: "TOIL/Annual Leave added to entries (Suggestion by: Mercedes B)" },
+            { type: "feat", text: "Added ability for users to change abbreviations and set colours in settings for personal preference." },
+            { type: "ui", text: "Changed estimated calculations section to split EOS Overtime and Planned Overtime." },
+            { type: "fix", text: "Added Missing Station: Raynesway, Derbyshire" },
+            { type: "known_issue", text: "There has been no current issues found with this update, please use the feedback form to report any problems." },
+        ]
+    },
+    {
         version: "v0.8.3-beta",
         date: "2025-06-19",
         changes: [

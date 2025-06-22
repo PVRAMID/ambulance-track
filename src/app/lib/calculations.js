@@ -1,12 +1,11 @@
 // src/app/lib/calculations.js
-import { PAY_BANDS, OVERTIME_RATE_ENHANCED, OVERTIME_RATE_STANDARD, DIVISIONS_AND_STATIONS, MILEAGE_RATE } from './constants';
+import { PAY_BANDS, OVERTIME_RATE_ENHANCED, OVERTIME_RATE_STANDARD, PLANNED_OVERTIME_RATE_ENHANCED, PLANNED_OVERTIME_RATE_STANDARD, DIVISIONS_AND_STATIONS, MILEAGE_RATE } from './constants';
 import { getCoordsFromPostcode, getDistanceFromLatLonInMiles } from './mileage';
 
-export function calculateOvertime(settings, overtimeHours, overtimeMinutes, isEnhancedRate) {
+export function calculateEndOfShiftOvertime(settings, overtimeHours, overtimeMinutes, isEnhancedRate) {
     const hourlyRate = settings.band && settings.step ? PAY_BANDS[settings.band]?.[settings.step] : 0;
     
     if (!hourlyRate) {
-        // This case should be handled by the caller, but we return a default value.
         return { overtimePay: 0, overtimeDuration: 0, error: 'Please set your Pay Band and Step Point in Settings to calculate overtime pay.' };
     }
 
@@ -14,8 +13,47 @@ export function calculateOvertime(settings, overtimeHours, overtimeMinutes, isEn
     const rateModifier = isEnhancedRate ? OVERTIME_RATE_ENHANCED : OVERTIME_RATE_STANDARD;
     const overtimePay = (hourlyRate / 60) * totalMinutes * rateModifier;
 
-    return { overtimePay, overtimeDuration: totalMinutes };
+    const calculationBreakdown = {
+        duration: totalMinutes,
+        hourlyRate: hourlyRate.toFixed(2),
+        rateModifier: rateModifier,
+        estimatedPay: overtimePay.toFixed(2)
+    };
+
+    return { overtimePay, overtimeDuration: totalMinutes, calculationBreakdown };
 }
+
+export function calculatePlannedOvertime(settings, timeFrom, timeTo, isEnhancedRate) {
+    const hourlyRate = settings.band && settings.step ? PAY_BANDS[settings.band]?.[settings.step] : 0;
+    
+    if (!hourlyRate || !timeFrom || !timeTo) {
+        return { overtimePay: 0, overtimeDuration: 0, error: 'Please set your Pay Band and Step Point in Settings, and provide shift times to calculate overtime pay.' };
+    }
+
+    const [fromHours, fromMinutes] = timeFrom.split(':').map(Number);
+    const [toHours, toMinutes] = timeTo.split(':').map(Number);
+
+    const fromDate = new Date(0, 0, 0, fromHours, fromMinutes);
+    let toDate = new Date(0, 0, 0, toHours, toMinutes);
+
+    if (toDate < fromDate) {
+        toDate.setDate(toDate.getDate() + 1);
+    }
+    
+    const totalMinutes = (toDate - fromDate) / 60000;
+    const rateModifier = isEnhancedRate ? PLANNED_OVERTIME_RATE_ENHANCED : PLANNED_OVERTIME_RATE_STANDARD;
+    const overtimePay = (hourlyRate / 60) * totalMinutes * rateModifier;
+
+    const calculationBreakdown = {
+        duration: totalMinutes,
+        hourlyRate: hourlyRate.toFixed(2),
+        rateModifier: rateModifier,
+        estimatedPay: overtimePay.toFixed(2)
+    };
+
+    return { overtimePay, overtimeDuration: totalMinutes, calculationBreakdown };
+}
+
 
 export async function calculateMileage(settings, workingDivision, workingStation) {
     try {

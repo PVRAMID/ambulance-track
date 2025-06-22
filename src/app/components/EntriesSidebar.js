@@ -1,9 +1,10 @@
-// pvramid/ambulance-track/ambulance-track-1d0d37eaed18867f1ddff8bf2aff81949149a05b/src/app/components/EntriesSidebar.js
+// src/app/components/EntriesSidebar.js
 'use client';
 import React, { useMemo } from 'react';
 import { Clock, Info, Edit, AlarmClockOff } from 'lucide-react';
+import { SHIFT_CLAIM_TYPES } from '../lib/constants';
 
-const EntriesSidebar = ({ entries, onEdit, onShowBreakdown, view, setView, currentDate }) => {
+const EntriesSidebar = ({ entries, onEdit, onShowBreakdown, onShowOvertimeBreakdown, view, setView, currentDate }) => {
     const sortedEntries = useMemo(() => {
         const allEntries = Object.entries(entries)
             .flatMap(([date, dayEntries]) => dayEntries.map(entry => ({...entry, date})));
@@ -38,7 +39,23 @@ const EntriesSidebar = ({ entries, onEdit, onShowBreakdown, view, setView, curre
                             <div>
                                 <p className="font-bold text-sm text-blue-600 dark:text-blue-400">{entry.claimType}</p>
                                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{new Date(entry.date + 'T12:00:00').toLocaleDateString()}</p>
-                                <p className="text-sm text-gray-800 dark:text-gray-200 mt-2">Callsign: {entry.callsign}</p>
+                                {Object.keys(SHIFT_CLAIM_TYPES).includes(entry.claimType) ? (
+                                    <div className="mt-2">
+                                        {entry.timeFrom && entry.timeTo ? (
+                                             <p className="text-sm text-gray-800 dark:text-gray-200">{entry.timeFrom} - {entry.timeTo}</p>
+                                        ) : (
+                                            <p className="text-sm text-gray-800 dark:text-gray-200">Full Day</p>
+                                        )}
+                                        {entry.claimType === 'Overtime Shift' && entry.overtimeDuration > 0 && (
+                                            <div className="text-xs text-yellow-800 dark:text-yellow-400 mt-1.5 flex items-center font-medium">
+                                                <Clock className="w-3.5 h-3.5 mr-1.5" /> {Math.floor(entry.overtimeDuration/60)}h {entry.overtimeDuration % 60}m (~£{entry.overtimePay?.toFixed(2)})
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                     <p className="text-sm text-gray-800 dark:text-gray-200 mt-2">Callsign: {entry.callsign}</p>
+                                )}
+
                                 {entry.claimType === 'Late Finish' && (
                                     <>
                                         {entry.overtimeDuration > 0 && (
@@ -60,6 +77,9 @@ const EntriesSidebar = ({ entries, onEdit, onShowBreakdown, view, setView, curre
                             <div className="flex items-center space-x-1">
                                 {entry.claimType === 'Mileage' && entry.calculationBreakdown && (
                                      <button onClick={() => onShowBreakdown(entry)} className="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors"><Info className="w-4 h-4"/></button>
+                                )}
+                                {(entry.claimType === 'Late Finish' || entry.claimType === 'Overtime Shift') && entry.calculationBreakdown && (
+                                     <button onClick={() => onShowOvertimeBreakdown(entry)} className="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors"><Info className="w-4 h-4"/></button>
                                 )}
                                 <button onClick={() => onEdit(entry, entry.date)} className="p-1.5 text-gray-400 hover:text-gray-800 dark:hover:text-white rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors"><Edit className="w-4 h-4"/></button>
                             </div>

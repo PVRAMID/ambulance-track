@@ -10,6 +10,7 @@ import WelcomeModal from './components/WelcomeModal';
 import EntryModal from './components/EntryModal';
 import SettingsModal from './components/SettingsModal';
 import MileageBreakdownModal from './components/MileageBreakdownModal';
+import OvertimeBreakdownModal from './components/OvertimeBreakdownModal';
 import FeedbackModal from './components/FeedbackModal';
 import ChangelogModal from './components/ChangelogModal';
 import AboutModal from './components/AboutModal';
@@ -31,6 +32,7 @@ export default function Home() {
         selectedDate,
         editingEntry,
         breakdownEntry,
+        overtimeBreakdownEntry,
         entries,
         settings,
         theme,
@@ -192,13 +194,21 @@ export default function Home() {
                                 hasUnread={hasUnread}
                             />
                             <div className="mt-4">
-                               <Calendar currentDate={currentDate} onDateClick={modals.entry.open} entries={entries} />
+                               <Calendar currentDate={currentDate} onDateClick={modals.entry.open} entries={entries} settings={settings} />
                             </div>
                             <MonthlyEarnings currentDate={currentDate} entries={entries} />
                         </div>
                         <aside className="w-full xl:w-96 mt-8 xl:mt-0 xl:pl-8 xl:border-l border-gray-200 dark:border-gray-700/60">
                              <div className="xl:sticky xl:top-8">
-                               <EntriesSidebar entries={entries} onEdit={modals.entry.openEdit} onShowBreakdown={modals.breakdown.open} view={sidebarView} setView={setSidebarView} currentDate={currentDate} />
+                               <EntriesSidebar 
+                                   entries={entries} 
+                                   onEdit={modals.entry.openEdit} 
+                                   onShowBreakdown={modals.breakdown.open} 
+                                   onShowOvertimeBreakdown={modals.overtimeBreakdown.open}
+                                   view={sidebarView} 
+                                   setView={setSidebarView} 
+                                   currentDate={currentDate} 
+                                />
                             </div>
                         </aside>
                     </div>
@@ -275,6 +285,12 @@ export default function Home() {
                         isOpen={modals.breakdown.isOpen}
                         onClose={modals.breakdown.close}
                         entry={breakdownEntry}
+                    />
+
+                    <OvertimeBreakdownModal
+                        isOpen={modals.overtimeBreakdown.isOpen}
+                        onClose={modals.overtimeBreakdown.close}
+                        entry={overtimeBreakdownEntry}
                     />
 
                        <InformationModal

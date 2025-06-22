@@ -12,9 +12,9 @@ import {
     // Admin functions are called directly from the modal now
 } from './useFirebase';
 import { auth, onAuthStateChanged, googleProvider, signInWithPopup } from '../lib/firebase';
-import { calculateOvertime, calculateMileage } from '../lib/calculations';
+import { calculateEndOfShiftOvertime, calculatePlannedOvertime, calculateMileage } from '../lib/calculations';
 import { sendAnalyticsEvent } from '../lib/analytics';
-import { APP_VERSION, ENABLE_UPDATE_NOTIFICATION, ALLOWANCE_CLAIM_TYPES } from '../lib/constants';
+import { APP_VERSION, ENABLE_UPDATE_NOTIFICATION, ALLOWANCE_CLAIM_TYPES, SHIFT_CLAIM_TYPES } from '../lib/constants';
 import { WORD_LIST } from '../lib/words';
 
 function generateWordId() {
@@ -32,7 +32,7 @@ export function useAppLogic() {
     const [userId] = usePersistentState('actracker_userId', generateWordId());
     const [entries, setEntries] = usePersistentState('ambulanceLogEntries_v6', {});
     const [settings, setSettings] = usePersistentState('ambulanceLogSettings_v6', {
-        grade: '', band: '', step: '', division: '', station: '', userPostcode: ''
+        grade: '', band: '', step: '', division: '', station: '', userPostcode: '', customShiftTypes: { ...SHIFT_CLAIM_TYPES }
     });
     const { isSyncEnabled, setIsSyncEnabled, syncStatus, setSyncStatus } = useSync();
     
@@ -40,6 +40,7 @@ export function useAppLogic() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [editingEntry, setEditingEntry] = useState(null);
     const [breakdownEntry, setBreakdownEntry] = useState(null);
+    const [overtimeBreakdownEntry, setOvertimeBreakdownEntry] = useState(null);
     const [deleteRequest, setDeleteRequest] = useState(null);
 
     const [isEntryModalOpen, setIsEntryModalOpen] = useState(false);
@@ -152,9 +153,15 @@ export function useAppLogic() {
         let finalData = { ...entryData };
 
         if (finalData.claimType === 'Late Finish') {
-            const { overtimePay, overtimeDuration } = calculateOvertime(settings, finalData.overtimeHours, finalData.overtimeMinutes, finalData.isEnhancedRate);
+            const { overtimePay, overtimeDuration, calculationBreakdown } = calculateEndOfShiftOvertime(settings, finalData.overtimeHours, finalData.overtimeMinutes, finalData.isEnhancedRate);
             finalData.overtimePay = overtimePay;
             finalData.overtimeDuration = overtimeDuration;
+            finalData.calculationBreakdown = calculationBreakdown;
+        } else if (finalData.claimType === 'Overtime Shift') {
+            const { overtimePay, overtimeDuration, calculationBreakdown } = calculatePlannedOvertime(settings, finalData.timeFrom, finalData.timeTo, finalData.isEnhancedRate);
+            finalData.overtimePay = overtimePay;
+            finalData.overtimeDuration = overtimeDuration;
+            finalData.calculationBreakdown = calculationBreakdown;
         } else if (finalData.claimType === 'Mileage') {
             const { mileage, mileagePay, calculationBreakdown } = await calculateMileage(settings, finalData.workingDivision, finalData.workingStation);
             finalData.mileage = mileage;
@@ -238,7 +245,7 @@ export function useAppLogic() {
     const handleCloseEntryModal = () => { setIsEntryModalOpen(false); setSelectedDate(null); setEditingEntry(null); };
 
     return {
-        currentDate, selectedDate, editingEntry, breakdownEntry, deleteRequest, entries, settings, theme, sidebarView, hasSeenWelcome, userId, isSyncEnabled, syncStatus, user,
+        currentDate, selectedDate, editingEntry, breakdownEntry, overtimeBreakdownEntry, deleteRequest, entries, settings, theme, sidebarView, hasSeenWelcome, userId, isSyncEnabled, syncStatus, user,
         isAdmin,
         handleAdminAction,
         hasUnread,
@@ -248,6 +255,7 @@ export function useAppLogic() {
             entry: { isOpen: isEntryModalOpen, open: handleOpenNewEntryModal, close: handleCloseEntryModal, openEdit: handleOpenEditEntryModal },
             settings: { isOpen: isSettingsModalOpen, open: () => setIsSettingsModalOpen(true), close: () => setIsSettingsModalOpen(false) },
             breakdown: { isOpen: !!breakdownEntry, open: setBreakdownEntry, close: () => setBreakdownEntry(null) },
+            overtimeBreakdown: { isOpen: !!overtimeBreakdownEntry, open: setOvertimeBreakdownEntry, close: () => setOvertimeBreakdownEntry(null) },
             feedback: { isOpen: isFeedbackModalOpen, open: () => setIsFeedbackModalOpen(true), close: () => setIsFeedbackModalOpen(false) },
             changelog: { isOpen: isChangelogModalOpen, open: () => setIsChangelogModalOpen(true), close: () => setIsChangelogModalOpen(false) },
             about: { isOpen: isAboutModalOpen, open: () => setIsAboutModalOpen(true), close: () => setIsAboutModalOpen(false) },

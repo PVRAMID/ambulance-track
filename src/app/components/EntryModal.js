@@ -2,13 +2,14 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import Modal from './Modal';
-import { ALLOWANCE_CLAIM_TYPES, UK_BANK_HOLIDAYS, DIVISIONS, DIVISIONS_AND_STATIONS } from '../lib/constants';
+import { ALLOWANCE_CLAIM_TYPES, UK_BANK_HOLIDAYS, DIVISIONS, DIVISIONS_AND_STATIONS, SHIFT_CLAIM_TYPES } from '../lib/constants';
 import { X, Info, AlertTriangle, Edit } from 'lucide-react';
 
 const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingEntry, settings, entriesForDay, onSelectForEdit }) => {
     const [formData, setFormData] = useState({});
     const [errors, setErrors] = useState({});
     const [isCalculating, setIsCalculating] = useState(false);
+    const [isFullDay, setIsFullDay] = useState(true);
 
     const getFormattedDateString = (date) => {
         if (!date) return null;
@@ -28,14 +29,36 @@ const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingE
             claimType: '', callsign: '', incidentNumber: '', details: '', 
             overtimeHours: '0', overtimeMinutes: '0', isEnhancedRate: dayIsSunday || dayIsBankHoliday,
             workingDivision: '', workingStation: '', mileage: '', mileagePay: 0,
-            endOfShiftTime: '', // Added field
+            endOfShiftTime: '',
+            timeFrom: '', timeTo: '',
             ...existingEntry
         };
         
         setFormData(initialData);
+        
+        if (initialData.claimType === 'Annual Leave' || initialData.claimType === 'Time off in Lieu') {
+            // If existing entry has times, it's not a full day
+            setIsFullDay(!initialData.timeFrom && !initialData.timeTo);
+        } else {
+            setIsFullDay(false);
+        }
+
         setErrors({});
     }, [existingEntry, isOpen, selectedDate]);
     
+    const handleSelectChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+        
+        if (name === 'claimType') {
+            if (value === 'Annual Leave' || value === 'Time off in Lieu') {
+                setIsFullDay(true);
+            } else {
+                setIsFullDay(false);
+            }
+        }
+    };
+
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         
@@ -44,18 +67,12 @@ const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingE
             return;
         }
 
-        // Only convert specific fields to uppercase
         const upperCaseFields = ['callsign', 'incidentNumber'];
         if (upperCaseFields.includes(name)) {
              setFormData(prev => ({ ...prev, [name]: value.toUpperCase() }));
         } else {
              setFormData(prev => ({ ...prev, [name]: value }));
         }
-    };
-
-    const handleSelectChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
     };
     
     const handleDivisionChange = (e) => {
@@ -96,15 +113,27 @@ const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingE
         e.preventDefault();
         if (!validate()) return;
         setIsCalculating(true);
-        setErrors({}); // Clear previous errors
+        setErrors({});
+        
+        let finalData = { ...formData };
+        if (isFullDay && (finalData.claimType === 'Annual Leave' || finalData.claimType === 'Time off in Lieu')) {
+            finalData.timeFrom = '';
+            finalData.timeTo = '';
+        }
+        
         try {
-            await onSave(formData);
+            await onSave(finalData);
         } catch (error) {
             setErrors({ apiError: error.message || "Calculation failed. Please check postcodes." });
         } finally {
             setIsCalculating(false);
         }
     };
+
+    const showTimeInputs = 
+        (Object.keys(SHIFT_CLAIM_TYPES).includes(formData.claimType) && 
+         !['Annual Leave', 'Time off in Lieu'].includes(formData.claimType)) ||
+        (['Annual Leave', 'Time off in Lieu'].includes(formData.claimType) && !isFullDay);
 
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
@@ -123,6 +152,11 @@ const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingE
                             <option value="Mileage">Mileage</option>
                             <optgroup label="Allowances">
                                 {Object.keys(ALLOWANCE_CLAIM_TYPES).map(claim => (
+                                    <option key={claim} value={claim}>{claim}</option>
+                                ))}
+                            </optgroup>
+                             <optgroup label="Shift Types">
+                                {Object.keys(SHIFT_CLAIM_TYPES).map(claim => (
                                     <option key={claim} value={claim}>{claim}</option>
                                 ))}
                             </optgroup>
@@ -146,6 +180,29 @@ const EntryModal = ({ isOpen, onClose, onSave, onDelete, selectedDate, existingE
                             </div>
                         )}
                     </div>
+
+                    {['Annual Leave', 'Time off in Lieu'].includes(formData.claimType) && (
+                        <div className="flex items-center space-x-3">
+                            <input type="checkbox" name="isFullDay" id="isFullDay" checked={isFullDay} onChange={(e) => setIsFullDay(e.target.checked)} className="h-4 w-4 rounded bg-gray-200 dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-blue-600 focus:ring-blue-500" />
+                            <label htmlFor="isFullDay" className="text-sm text-gray-700 dark:text-gray-300">Full Day Event</label>
+                        </div>
+                    )}
+
+                    {showTimeInputs && (
+                         <div className="p-4 bg-gray-100 dark:bg-gray-700/60 rounded-lg space-y-4">
+                            <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Shift Details</p>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label htmlFor="timeFrom" className="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-1.5">From</label>
+                                    <input type="time" id="timeFrom" name="timeFrom" value={formData.timeFrom || ''} onChange={handleChange} className="w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-gray-900 dark:text-gray-100" />
+                                </div>
+                                <div>
+                                    <label htmlFor="timeTo" className="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-1.5">To</label>
+                                     <input type="time" id="timeTo" name="timeTo" value={formData.timeTo || ''} onChange={handleChange} className="w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-gray-900 dark:text-gray-100" />
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {formData.claimType === 'Late Finish' && (
                         <div className="p-4 bg-gray-100 dark:bg-gray-700/60 rounded-lg space-y-4">

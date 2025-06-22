@@ -1,10 +1,13 @@
 // src/app/lib/constants.js
-export const APP_VERSION = "v0.5.0-beta";
+export const APP_VERSION = "v0.9.0-beta";
 export const ENABLE_UPDATE_NOTIFICATION = false; // Toggle the update notification feature here
 export const DEV_LOGGING_ENABLED = true; // Toggle console logs for development
 export const MILEAGE_RATE = 0.45;
 export const OVERTIME_RATE_STANDARD = 1.3;
 export const OVERTIME_RATE_ENHANCED = 1.6;
+export const PLANNED_OVERTIME_RATE_STANDARD = 1.3;
+export const PLANNED_OVERTIME_RATE_ENHANCED = 1.6;
+
 
 export const ALLOWANCE_CLAIM_TYPES = {
     'Away from Base - Annex 14 >5': {
@@ -37,6 +40,13 @@ export const ALLOWANCE_CLAIM_TYPES = {
         value: 10,
         ePayPrompt: 'No Rest Break NMB Non AFC'
     }
+};
+
+export const SHIFT_CLAIM_TYPES = {
+    'Overtime Shift': { abbreviation: 'OT', color: '#400400' },
+    'Essential Education': { abbreviation: 'EDU', color: '#5e0691' },
+    'Time off in Lieu': { abbreviation: 'TOIL', color: '#085931' },
+    'Annual Leave': { abbreviation: 'A/L', color: '#0d8f4e' }
 };
 
 export const PAY_BANDS = {
@@ -79,6 +89,7 @@ export const DIVISIONS_AND_STATIONS = {
         { name: 'Swadlincote Ambulance Station', postcode: 'DE11 0AE' },
         { name: 'Eckington Ambulance Station', postcode: 'S21 4AY' },
         { name: 'Alfreton Ambulance Station', postcode: 'DE55 7EG' },
+        { name: 'Raynesway Ambulance Station', postcode: 'DE21 7BR' },
     ],
     "Leicestershire": [
         { name: 'Gorse Hill Ambulance Station', postcode: 'LE7 7GL' },
