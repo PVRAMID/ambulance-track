@@ -27,7 +27,7 @@ export function calculatePlannedOvertime(settings, timeFrom, timeTo, isEnhancedR
     const hourlyRate = settings.band && settings.step ? PAY_BANDS[settings.band]?.[settings.step] : 0;
     
     if (!hourlyRate || !timeFrom || !timeTo) {
-        return { overtimePay: 0, overtimeDuration: 0, error: 'Please set your Pay Band and Step Point in Settings, and provide shift times to calculate overtime pay.' };
+        return { overtimePay: 0, overtimeDuration: 0, calculationBreakdown: null, error: 'Please set your Pay Band and Step Point in Settings, and provide shift times to calculate overtime pay.' };
     }
 
     const [fromHours, fromMinutes] = timeFrom.split(':').map(Number);

@@ -152,6 +152,14 @@ export function useAppLogic() {
         if (!selectedDate) return;
         let finalData = { ...entryData };
 
+        // Clean up old calculated fields before processing new ones
+        delete finalData.calculationBreakdown;
+        delete finalData.overtimePay;
+        delete finalData.overtimeDuration;
+        delete finalData.mileage;
+        delete finalData.mileagePay;
+        delete finalData.pay;
+
         if (finalData.claimType === 'Late Finish') {
             const { overtimePay, overtimeDuration, calculationBreakdown } = calculateEndOfShiftOvertime(settings, finalData.overtimeHours, finalData.overtimeMinutes, finalData.isEnhancedRate);
             finalData.overtimePay = overtimePay;
