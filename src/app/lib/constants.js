@@ -1,5 +1,5 @@
 // src/app/lib/constants.js
-export const APP_VERSION = "v0.9.0-beta";
+export const APP_VERSION = "v0.9.1-beta";
 export const ENABLE_UPDATE_NOTIFICATION = false; // Toggle the update notification feature here
 export const DEV_LOGGING_ENABLED = true; // Toggle console logs for development
 export const MILEAGE_RATE = 0.45;

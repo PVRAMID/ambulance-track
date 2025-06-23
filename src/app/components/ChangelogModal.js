@@ -6,6 +6,13 @@ import { X } from 'lucide-react';
 
 const changelogData = [
     {
+        version: "v0.9.1-beta",
+        date: "2025-06-23",
+        changes: [
+            { type: "feat", text: "Integrated two-way ticket system. Allowing users to create private support/feedback tickets. These tickets come with intergrated status management and live chat! Work in progress, but hey, it works!" },
+        ]
+    },
+    {
         version: "v0.9.0-beta",
         date: "2025-06-22",
         changes: [
