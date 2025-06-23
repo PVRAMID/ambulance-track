@@ -12,6 +12,8 @@ import SettingsModal from './components/SettingsModal';
 import MileageBreakdownModal from './components/MileageBreakdownModal';
 import OvertimeBreakdownModal from './components/OvertimeBreakdownModal';
 import FeedbackModal from './components/FeedbackModal';
+import SupportModal from './components/SupportModal';
+import TicketSystemModal from './components/TicketSystemModal';
 import ChangelogModal from './components/ChangelogModal';
 import AboutModal from './components/AboutModal';
 import RecoveryModal from './components/RecoveryModal';
@@ -45,9 +47,15 @@ export default function Home() {
         notifications,
         hasUnread,
         announcements,
-        user, // Get user state
-        handleAdminAction, // Get admin action handler
+        tickets,
+        unreadTicketCount,
+        user,
+        handleAdminAction,
         handleMarkAnnouncementsAsRead,
+        handleNewTicket,
+        handleReplyToTicket,
+        getMessagesForTicket,
+        handleMarkTicketAsRead,
         setCurrentDate,
         setSidebarView,
         setTheme,
@@ -182,7 +190,7 @@ export default function Home() {
                                 setCurrentDate={setCurrentDate} 
                                 onExport={handleExport} 
                                 onSettingsClick={modals.settings.open}
-                                onFeedbackClick={modals.feedback.open}
+                                onSupportClick={modals.support.open}
                                 onRecoveryClick={modals.recovery.open}
                                 onSyncToggleClick={modals.syncConfirm.open}
                                 onForceSyncClick={handleForceSync}
@@ -192,6 +200,8 @@ export default function Home() {
                                 setTheme={setTheme}
                                 onAnnouncementsClick={modals.announcements.open}
                                 hasUnread={hasUnread}
+                                unreadTicketCount={unreadTicketCount}
+                                onTicketSystemClick={modals.ticketSystem.open}
                             />
                             <div className="mt-4">
                                <Calendar currentDate={currentDate} onDateClick={modals.entry.open} entries={entries} settings={settings} />
@@ -249,6 +259,25 @@ export default function Home() {
                         onClose={modals.syncConfirm.close}
                         onConfirm={handleToggleSync}
                         isSyncEnabled={isSyncEnabled}
+                    />
+
+                    <SupportModal 
+                        isOpen={modals.support.isOpen}
+                        onClose={modals.support.close}
+                        onFeedbackClick={modals.feedback.open}
+                        onTicketClick={modals.ticketSystem.open}
+                    />
+
+                    <TicketSystemModal
+                        isOpen={modals.ticketSystem.isOpen}
+                        onClose={modals.ticketSystem.close}
+                        tickets={tickets}
+                        userId={userId}
+                        onNewTicket={handleNewTicket}
+                        onReply={handleReplyToTicket}
+                        getMessages={getMessagesForTicket}
+                        onMarkAsRead={handleMarkTicketAsRead}
+                        user={user}
                     />
 
                     <FeedbackModal

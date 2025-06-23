@@ -9,7 +9,11 @@ import {
     deleteServerData, 
     getAnnouncements,
     checkIfAdmin,
-    // Admin functions are called directly from the modal now
+    getTicketsForUser,
+    createTicket,
+    addMessageToTicket,
+    getMessagesForTicket,
+    markTicketAsRead,
 } from './useFirebase';
 import { auth, onAuthStateChanged, googleProvider, signInWithPopup } from '../lib/firebase';
 import { calculateEndOfShiftOvertime, calculatePlannedOvertime, calculateMileage } from '../lib/calculations';
@@ -53,6 +57,8 @@ export function useAppLogic() {
     const [isAnnouncementsModalOpen, setIsAnnouncementsModalOpen] = useState(false);
     const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
     const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+    const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+    const [isTicketSystemModalOpen, setIsTicketSystemModalOpen] = useState(false);
     
     const [showStorageWarning, setShowStorageWarning] = useState(false);
     const [showUpdateNotification, setShowUpdateNotification] = useState(false);
@@ -60,6 +66,9 @@ export function useAppLogic() {
     const [announcements, setAnnouncements] = useState([]);
     const [lastReadAnnouncement, setLastReadAnnouncement] = usePersistentState('actracker_lastReadAnnouncement', null);
     const [hasUnread, setHasUnread] = useState(false);
+
+    const [tickets, setTickets] = useState([]);
+    const [unreadTicketCount, setUnreadTicketCount] = useState(0);
 
     const [lastSeenVersion, setLastSeenVersion] = usePersistentState('actracker_lastSeenVersion', '0.0.0');
     const [theme, setTheme] = usePersistentState('ambulanceLogTheme_v2', 'dark');
@@ -81,6 +90,17 @@ export function useAppLogic() {
         });
         return () => unsubscribe();
     }, []);
+
+    useEffect(() => {
+        if (userId) {
+            const unsubscribe = getTicketsForUser(userId, (userTickets) => {
+                setTickets(userTickets);
+                const unreadCount = userTickets.filter(t => !t.isReadByUser).length;
+                setUnreadTicketCount(unreadCount);
+            });
+            return () => unsubscribe();
+        }
+    }, [userId]);
 
     const handleAdminAction = async () => {
         if (user && isAdmin) {
@@ -152,7 +172,6 @@ export function useAppLogic() {
         if (!selectedDate) return;
         let finalData = { ...entryData };
 
-        // Clean up old calculated fields before processing new ones
         delete finalData.calculationBreakdown;
         delete finalData.overtimePay;
         delete finalData.overtimeDuration;
@@ -258,6 +277,8 @@ export function useAppLogic() {
         handleAdminAction,
         hasUnread,
         announcements,
+        tickets,
+        unreadTicketCount,
         handleMarkAnnouncementsAsRead,
         modals: {
             entry: { isOpen: isEntryModalOpen, open: handleOpenNewEntryModal, close: handleCloseEntryModal, openEdit: handleOpenEditEntryModal },
@@ -273,8 +294,14 @@ export function useAppLogic() {
             announcements: { isOpen: isAnnouncementsModalOpen, open: () => setIsAnnouncementsModalOpen(true), close: () => setIsAnnouncementsModalOpen(false) },
             info: { isOpen: isInfoModalOpen, open: () => setIsInfoModalOpen(true), close: () => setIsInfoModalOpen(false) },
             admin: { isOpen: isAdminModalOpen, open: () => setIsAdminModalOpen(true), close: () => setIsAdminModalOpen(false)},
+            support: { isOpen: isSupportModalOpen, open: () => setIsSupportModalOpen(true), close: () => setIsSupportModalOpen(false) },
+            ticketSystem: { isOpen: isTicketSystemModalOpen, open: () => setIsTicketSystemModalOpen(true), close: () => setIsTicketSystemModalOpen(false) },
         },
         notifications: { storage: { isOpen: showStorageWarning, close: () => setShowStorageWarning(false) }, update: { isOpen: showUpdateNotification, close: handleCloseUpdateNotification, version: APP_VERSION },},
-        setCurrentDate, setSidebarView, setTheme, setHasSeenWelcome, handleSaveEntry, handleSetEditingEntry, confirmDelete, handleSaveSettings, handleToggleSync, handleRecoverData, handleDeleteServerData, handleForceSync
+        setCurrentDate, setSidebarView, setTheme, setHasSeenWelcome, handleSaveEntry, handleSetEditingEntry, confirmDelete, handleSaveSettings, handleToggleSync, handleRecoverData, handleDeleteServerData, handleForceSync,
+        handleNewTicket: (data) => createTicket(userId, data),
+        handleReplyToTicket: (ticketId, text) => addMessageToTicket(ticketId, userId, text),
+        getMessagesForTicket,
+        handleMarkTicketAsRead: (ticketId) => markTicketAsRead(ticketId, 'user'),
     };
 }

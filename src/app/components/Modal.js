@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 
-const Modal = ({ children, isOpen, onClose }) => {
+const Modal = ({ children, isOpen, onClose, sizeClass }) => {
     if (!isOpen) return null;
 
     return (
@@ -10,7 +10,7 @@ const Modal = ({ children, isOpen, onClose }) => {
             onClick={onClose}
         >
             <div 
-                className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto" 
+                className={`bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-h-[90vh] overflow-y-auto ${sizeClass || 'max-w-md'}`} 
                 onClick={e => e.stopPropagation()}
             >
                 {children}

@@ -1,6 +1,7 @@
+// src/app/components/Header.js
 'use client';
 import React from 'react';
-import { ChevronLeft, ChevronRight, Download, Settings, Sun, Moon, MessageSquare, LifeBuoy, RefreshCw, AlertCircle, CheckCircle, XCircle, Megaphone } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, Settings, Sun, Moon, MessageSquare, LifeBuoy, RefreshCw, AlertCircle, CheckCircle, XCircle, Megaphone, Bell } from 'lucide-react';
 
 const SyncIcon = ({ status }) => {
     switch (status) {
@@ -15,7 +16,7 @@ const SyncIcon = ({ status }) => {
     }
 };
 
-const Header = ({ currentDate, setCurrentDate, onExport, onSettingsClick, onFeedbackClick, onRecoveryClick, onSyncToggleClick, onForceSyncClick, isSyncEnabled, syncStatus, theme, setTheme, onAnnouncementsClick, hasUnread }) => {
+const Header = ({ currentDate, setCurrentDate, onExport, onSettingsClick, onSupportClick, onRecoveryClick, onSyncToggleClick, onForceSyncClick, isSyncEnabled, syncStatus, theme, setTheme, onAnnouncementsClick, hasUnread, unreadTicketCount, onTicketSystemClick }) => {
     const changeMonth = (offset) => {
         setCurrentDate(prevDate => {
             const newDate = new Date(prevDate);
@@ -53,9 +54,19 @@ const Header = ({ currentDate, setCurrentDate, onExport, onSettingsClick, onFeed
                     )}
                 </button>
                 <button 
-                    onClick={onFeedbackClick} 
+                    onClick={onTicketSystemClick} 
+                    className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors relative"
+                    title="Support Tickets"
+                >
+                    <Bell className="w-5 h-5" />
+                    {unreadTicketCount > 0 && (
+                        <span className="absolute top-1 right-1 block h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-800" />
+                    )}
+                </button>
+                <button 
+                    onClick={onSupportClick} 
                     className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors"
-                    title="Send Feedback"
+                    title="Support & Feedback"
                 >
                     <MessageSquare className="w-5 h-5" />
                 </button>

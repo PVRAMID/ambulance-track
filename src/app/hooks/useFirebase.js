@@ -1,5 +1,5 @@
 // src/app/hooks/useFirebase.js
-import { doc, setDoc, getDoc, deleteDoc, collection, getDocs, query, orderBy, addDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, deleteDoc, collection, getDocs, query, orderBy, addDoc, updateDoc, serverTimestamp, onSnapshot, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { devLog } from '../lib/logger';
 
@@ -85,7 +85,135 @@ export const getAnnouncements = async () => {
     }
 };
 
-// Admin Functions
+// --- Ticket System Functions ---
+
+export const createTicket = async (userId, ticketData) => {
+    if (!userId) return { success: false, error: 'User ID is required.' };
+    devLog(`Creating new ticket for user ${userId}`);
+    try {
+        const { subject, initialMessage, userName } = ticketData;
+        const ticketsCol = collection(db, 'tickets');
+        const newTicketRef = await addDoc(ticketsCol, {
+            userId,
+            subject,
+            userName: userName || 'Anonymous',
+            status: 'open',
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            isReadByUser: true,
+            isReadByAdmin: false,
+        });
+
+        const messagesCol = collection(newTicketRef, 'messages');
+        await addDoc(messagesCol, {
+            senderId: userId,
+            text: initialMessage,
+            timestamp: serverTimestamp(),
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error('Error creating ticket:', error);
+        return { success: false, error: 'Could not create ticket.' };
+    }
+};
+
+export const createTicketForUser = async (adminUid, targetUserId, ticketData) => {
+    if (!adminUid || !targetUserId) return { success: false, error: 'Admin and target User ID are required.' };
+    devLog(`Admin ${adminUid} creating new ticket for user ${targetUserId}`);
+    try {
+        const { subject, initialMessage } = ticketData;
+        const ticketsCol = collection(db, 'tickets');
+        const newTicketRef = await addDoc(ticketsCol, {
+            userId: targetUserId,
+            subject,
+            userName: 'Admin Initiated',
+            status: 'open',
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            isReadByUser: false,
+            isReadByAdmin: true,
+        });
+
+        const messagesCol = collection(newTicketRef, 'messages');
+        await addDoc(messagesCol, {
+            senderId: adminUid,
+            text: initialMessage,
+            timestamp: serverTimestamp(),
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error('Error creating ticket for user:', error);
+        return { success: false, error: 'Could not create ticket.' };
+    }
+};
+
+
+export const getTicketsForUser = (userId, callback) => {
+    if (!userId) return () => {};
+    devLog(`Setting up ticket listener for user ${userId}`);
+    const ticketsCol = collection(db, 'tickets');
+    const q = query(ticketsCol, where('userId', '==', userId), orderBy('updatedAt', 'desc'));
+    
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const userTickets = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        callback(userTickets);
+    }, (error) => {
+        console.error("Error listening for ticket updates:", error);
+    });
+
+    return unsubscribe;
+};
+
+export const getMessagesForTicket = (ticketId, callback) => {
+    if (!ticketId) return () => {};
+    const messagesCol = collection(db, 'tickets', ticketId, 'messages');
+    const q = query(messagesCol, orderBy('timestamp', 'asc'));
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const messages = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        callback(messages);
+    }, (error) => {
+        console.error(`Error listening for messages for ticket ${ticketId}:`, error);
+    });
+
+    return unsubscribe;
+};
+
+export const addMessageToTicket = async (ticketId, senderId, text, isSenderAdmin = false) => {
+    if (!ticketId || !senderId || !text) return { success: false, error: 'Missing required fields.' };
+    try {
+        const messagesCol = collection(db, 'tickets', ticketId, 'messages');
+        await addDoc(messagesCol, { senderId, text, timestamp: serverTimestamp() });
+        
+        const ticketRef = doc(db, 'tickets', ticketId);
+        await updateDoc(ticketRef, { 
+            updatedAt: serverTimestamp(),
+            isReadByAdmin: isSenderAdmin ? true : false,
+            isReadByUser: isSenderAdmin ? false : true,
+        });
+
+        return { success: true };
+    } catch(error) {
+        console.error(`Error adding message to ticket ${ticketId}:`, error);
+        return { success: false, error: 'Could not add message.'};
+    }
+};
+
+export const markTicketAsRead = async (ticketId, userType) => {
+    if (!ticketId) return;
+    try {
+        const ticketRef = doc(db, 'tickets', ticketId);
+        const updateData = userType === 'user' ? { isReadByUser: true } : { isReadByAdmin: true };
+        await updateDoc(ticketRef, updateData);
+    } catch (error) {
+        console.error(`Error marking ticket ${ticketId} as read:`, error);
+    }
+};
+
+
+// --- Admin Functions ---
 export const checkIfAdmin = async (uid) => {
     if (!uid) return false;
     devLog(`Checking admin status for UID: ${uid}`);
@@ -116,6 +244,33 @@ export const getAllUsers = async () => {
         return { success: false, error: 'Could not fetch users.' };
     }
 };
+
+export const getAllTickets = (callback) => {
+    const ticketsCol = collection(db, 'tickets');
+    const q = query(ticketsCol, orderBy('updatedAt', 'desc'));
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const allTickets = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        callback(allTickets);
+    }, (error) => {
+        console.error("Error listening for all ticket updates:", error);
+    });
+
+    return unsubscribe;
+};
+
+export const updateTicketStatus = async (ticketId, status) => {
+    if (!ticketId || !status) return { success: false, error: 'Ticket ID and status are required.' };
+    try {
+        const ticketRef = doc(db, 'tickets', ticketId);
+        await updateDoc(ticketRef, { status: status, updatedAt: serverTimestamp() });
+        return { success: true };
+    } catch (error) {
+        console.error(`Error updating status for ticket ${ticketId}:`, error);
+        return { success: false, error: 'Could not update status.' };
+    }
+};
+
 
 export const deleteUserContent = async (userIdToDelete) => {
     devLog(`Attempting to delete content for user: ${userIdToDelete}`);
