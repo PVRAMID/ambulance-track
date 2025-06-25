@@ -79,7 +79,7 @@ export function useAppLogic() {
     const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
-        // This effect runs once on mount to ensure user settings are up-to-date with the latest constants.
+        // This effect runs on mount and whenever settings change to ensure user settings are up-to-date with the latest constants.
         const masterShiftTypes = Object.keys(SHIFT_CLAIM_TYPES);
         const userShiftTypes = settings.customShiftTypes ? Object.keys(settings.customShiftTypes) : [];
         
@@ -95,7 +95,7 @@ export function useAppLogic() {
             };
             setSettings(updatedSettings);
         }
-    }, []); // Run only on initial mount
+    }, [settings, setSettings]);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {

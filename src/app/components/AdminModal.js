@@ -1,6 +1,7 @@
 // src/app/components/AdminModal.js
 'use client';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import Image from 'next/image';
 import Modal from './Modal';
 import { X, Users, Megaphone, UserPlus, Trash2, Edit, ChevronDown, ChevronUp, Save, Send, LifeBuoy, Wrench } from 'lucide-react';
 import {
@@ -17,7 +18,7 @@ import {
     addMessageToTicket,
     updateTicketStatus,
     createTicketForUser,
-    mergeUserEntries, // Import the new function
+    mergeUserEntries,
 } from '../hooks/useFirebase';
 import { GRADES, PAY_BANDS, DIVISIONS, DIVISIONS_AND_STATIONS } from '../lib/constants';
 
@@ -465,7 +466,7 @@ const AdminModal = ({ isOpen, onClose, user }) => {
                                 <div className="space-y-3">
                                     {announcements.map(ann => (
                                         <div key={ann.id} className="p-3 bg-gray-50 dark:bg-gray-700/40 rounded-lg">
-                                            {ann.imageUrl && <img src={ann.imageUrl} alt="Announcement" className="rounded-md mb-2 max-h-48 w-full object-cover" />}
+                                            {ann.imageUrl && <Image src={ann.imageUrl} alt="Announcement" width={400} height={200} className="rounded-md mb-2 max-h-48 w-full object-cover" />}
                                             <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{ann.content}</p>
                                             <div className="flex items-center justify-between mt-2">
                                                 <p className="text-xs text-gray-500 dark:text-gray-400">By {ann.author} on {formatDate(ann.timestamp)}</p>
@@ -532,7 +533,7 @@ const AdminModal = ({ isOpen, onClose, user }) => {
                                 <div>
                                     <h3 className="text-lg font-semibold mb-2 text-gray-800 dark:text-white">Merge User Entries</h3>
                                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                                        This tool will merge all entries from a source user into a target user. The source user's data (including entries and settings) will be deleted after the merge. This action cannot be undone.
+                                        This tool will merge all entries from a source user into a target user. The source user&apos;s data (including entries and settings) will be deleted after the merge. This action cannot be undone.
                                     </p>
                                     <form onSubmit={handleMergeRequest} className="p-4 border border-gray-200 dark:border-gray-700/60 rounded-lg space-y-4">
                                         <div>
@@ -600,7 +601,7 @@ const AdminModal = ({ isOpen, onClose, user }) => {
                             <br />
                             <strong className="font-mono text-green-600 dark:text-green-400">{mergeConfirmation.target}</strong>?
                             <br /><br />
-                            The source user's data will be permanently deleted. This action cannot be undone.
+                            The source user&apos;s data will be permanently deleted. This action cannot be undone.
                         </p>
                         <div className="flex justify-end space-x-3">
                             <button onClick={() => setMergeConfirmation(null)} className="px-4 py-2 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">Cancel</button>
