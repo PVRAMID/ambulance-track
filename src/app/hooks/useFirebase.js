@@ -335,3 +335,61 @@ export const addAdmin = async (uid) => {
         return { success: false, error: 'Could not add admin.' };
     }
 };
+
+export const mergeUserEntries = async (sourceUserId, targetUserId) => {
+    if (!sourceUserId || !targetUserId) {
+        return { success: false, error: 'Both source and target User IDs are required.' };
+    }
+    if (sourceUserId === targetUserId) {
+        return { success: false, error: 'Source and Target User IDs cannot be the same.' };
+    }
+
+    devLog(`Starting merge from ${sourceUserId} to ${targetUserId}`);
+
+    try {
+        const sourceDocRef = doc(db, 'user-data', sourceUserId);
+        const targetDocRef = doc(db, 'user-data', targetUserId);
+
+        const sourceDocSnap = await getDoc(sourceDocRef);
+        const targetDocSnap = await getDoc(targetDocRef);
+
+        if (!sourceDocSnap.exists()) {
+            return { success: false, error: `Source user (${sourceUserId}) not found.` };
+        }
+        if (!targetDocSnap.exists()) {
+            return { success: false, error: `Target user (${targetUserId}) not found.` };
+        }
+
+        const sourceData = sourceDocSnap.data();
+        const targetData = targetDocSnap.data();
+
+        const sourceEntries = sourceData.entries || {};
+        const targetEntries = targetData.entries || {};
+        
+        const mergedEntries = { ...targetEntries };
+
+        for (const date in sourceEntries) {
+            if (Object.prototype.hasOwnProperty.call(sourceEntries, date)) {
+                if (mergedEntries[date]) {
+                    const existingIds = new Set(mergedEntries[date].map(e => e.id));
+                    const newEntriesForDate = sourceEntries[date].filter(e => !existingIds.has(e.id));
+                    mergedEntries[date] = [...mergedEntries[date], ...newEntriesForDate];
+                } else {
+                    mergedEntries[date] = sourceEntries[date];
+                }
+            }
+        }
+
+        await updateDoc(targetDocRef, { entries: mergedEntries, lastSynced: serverTimestamp() });
+        
+        await deleteDoc(sourceDocRef);
+
+        devLog(`Merge successful. ${sourceUserId} entries merged into ${targetUserId} and source document deleted.`);
+        return { success: true };
+
+    } catch (error) {
+        console.error("Error merging user entries:", error);
+        devLog('Merge failed:', error);
+        return { success: false, error: 'An error occurred during the merge process.' };
+    }
+};

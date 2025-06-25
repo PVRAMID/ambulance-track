@@ -2,7 +2,7 @@
 'use client';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Modal from './Modal';
-import { X, Users, Megaphone, UserPlus, Trash2, Edit, ChevronDown, ChevronUp, Save, Send, LifeBuoy } from 'lucide-react';
+import { X, Users, Megaphone, UserPlus, Trash2, Edit, ChevronDown, ChevronUp, Save, Send, LifeBuoy, Wrench } from 'lucide-react';
 import {
     getAllUsers,
     deleteUserContent,
@@ -17,6 +17,7 @@ import {
     addMessageToTicket,
     updateTicketStatus,
     createTicketForUser,
+    mergeUserEntries, // Import the new function
 } from '../hooks/useFirebase';
 import { GRADES, PAY_BANDS, DIVISIONS, DIVISIONS_AND_STATIONS } from '../lib/constants';
 
@@ -49,6 +50,11 @@ const AdminModal = ({ isOpen, onClose, user }) => {
 
     // State for adding admins
     const [newAdminUid, setNewAdminUid] = useState('');
+
+    // State for merge tool
+    const [sourceMergeId, setSourceMergeId] = useState('');
+    const [targetMergeId, setTargetMergeId] = useState('');
+    const [mergeConfirmation, setMergeConfirmation] = useState(null);
 
     // State for confirmations
     const [itemToDelete, setItemToDelete] = useState(null);
@@ -101,8 +107,11 @@ const AdminModal = ({ isOpen, onClose, user }) => {
             setEditingAnnouncement(null);
             setItemToDelete(null);
             setShowNewTicketForm(false);
+            setSourceMergeId('');
+            setTargetMergeId('');
+            setMergeConfirmation(null);
         }
-    }, [isOpen, fetchAllData]);
+    }, [isOpen, fetchAllData, activeTab]);
     
     useEffect(() => {
         if (user && user.displayName && !editingAnnouncement) {
@@ -117,6 +126,8 @@ const AdminModal = ({ isOpen, onClose, user }) => {
         setEditingAnnouncement(null);
         setSelectedTicket(null);
         setShowNewTicketForm(false);
+        setSourceMergeId('');
+        setTargetMergeId('');
     };
 
     const handleDeleteClick = (type, id, name) => setItemToDelete({ type, id, name });
@@ -145,7 +156,6 @@ const AdminModal = ({ isOpen, onClose, user }) => {
 
         if (result.success) {
             alert('Ticket created successfully.');
-            // Reset form
             setShowNewTicketForm(false);
             setNewTicketUserId('');
             setNewTicketSubject('');
@@ -245,6 +255,33 @@ const AdminModal = ({ isOpen, onClose, user }) => {
         }
     };
 
+    const handleMergeRequest = (e) => {
+        e.preventDefault();
+        if (!sourceMergeId || !targetMergeId) {
+            alert('Please provide both a source and a target User ID.');
+            return;
+        }
+        setMergeConfirmation({ source: sourceMergeId, target: targetMergeId });
+    };
+
+    const handleConfirmMerge = async () => {
+        if (!mergeConfirmation) return;
+        setIsLoading(true);
+        const { source, target } = mergeConfirmation;
+        const result = await mergeUserEntries(source, target);
+        setIsLoading(false);
+
+        if (result.success) {
+            alert('Merge successful!');
+            setSourceMergeId('');
+            setTargetMergeId('');
+            fetchAllData('users'); // Refresh user list
+        } else {
+            alert(`Merge failed: ${result.error}`);
+        }
+        setMergeConfirmation(null);
+    };
+
     const formatDate = (timestamp) => {
         if (!timestamp) return 'N/A';
         const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -333,11 +370,12 @@ const AdminModal = ({ isOpen, onClose, user }) => {
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
-                        <div className="flex border-b border-gray-200 dark:border-gray-700 mt-4">
+                        <div className="flex border-b border-gray-200 dark:border-gray-700 mt-4 overflow-x-auto">
                             <button onClick={() => handleTabChange('users')} className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium ${activeTab === 'users' ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}><Users size={16} /><span>Users</span></button>
                             <button onClick={() => handleTabChange('announcements')} className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium ${activeTab === 'announcements' ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}><Megaphone size={16} /><span>Announcements</span></button>
                             <button onClick={() => handleTabChange('tickets')} className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium ${activeTab === 'tickets' ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}><LifeBuoy size={16} /><span>Tickets</span></button>
                             <button onClick={() => handleTabChange('staff')} className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium ${activeTab === 'staff' ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}><UserPlus size={16} /><span>Staff</span></button>
+                            <button onClick={() => handleTabChange('tools')} className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium ${activeTab === 'tools' ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}><Wrench size={16} /><span>Tools</span></button>
                         </div>
                     </div>
 
@@ -393,7 +431,7 @@ const AdminModal = ({ isOpen, onClose, user }) => {
                                                         )}
                                                     </div>
                                                     <div>
-                                                         <h5 className="font-semibold text-gray-600 dark:text-gray-400 mb-2">Recent Entries:</h5>
+                                                         <h5 className="font-semibold text-gray-600 dark:text-gray-400 mb-2">Entries:</h5>
                                                          <pre className="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-lg text-xs max-h-60 overflow-y-auto">
                                                             {JSON.stringify(selectedUser.entries, null, 2)}
                                                         </pre>
@@ -488,6 +526,50 @@ const AdminModal = ({ isOpen, onClose, user }) => {
                                 </div>
                             </div>
                         )}
+                        
+                        {activeTab === 'tools' && (
+                            <div className="space-y-6">
+                                <div>
+                                    <h3 className="text-lg font-semibold mb-2 text-gray-800 dark:text-white">Merge User Entries</h3>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                                        This tool will merge all entries from a source user into a target user. The source user's data (including entries and settings) will be deleted after the merge. This action cannot be undone.
+                                    </p>
+                                    <form onSubmit={handleMergeRequest} className="p-4 border border-gray-200 dark:border-gray-700/60 rounded-lg space-y-4">
+                                        <div>
+                                            <label htmlFor="source-id" className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1.5">Source User ID (will be deleted)</label>
+                                            <input
+                                                id="source-id"
+                                                type="text"
+                                                value={sourceMergeId}
+                                                onChange={(e) => setSourceMergeId(e.target.value)}
+                                                placeholder="Enter source User ID..."
+                                                className="w-full bg-gray-100 dark:bg-gray-700/60 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-gray-900 dark:text-gray-100"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label htmlFor="target-id" className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1.5">Target User ID (will receive entries)</label>
+                                            <input
+                                                id="target-id"
+                                                type="text"
+                                                value={targetMergeId}
+                                                onChange={(e) => setTargetMergeId(e.target.value)}
+                                                placeholder="Enter target User ID..."
+                                                className="w-full bg-gray-100 dark:bg-gray-700/60 border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-gray-900 dark:text-gray-100"
+                                            />
+                                        </div>
+                                        <div className="flex justify-end">
+                                            <button
+                                                type="submit"
+                                                disabled={isLoading}
+                                                className="px-4 py-2 text-sm font-semibold text-white bg-orange-600 rounded-lg hover:bg-orange-700 disabled:bg-orange-400"
+                                            >
+                                                {isLoading ? 'Merging...' : 'Merge Entries'}
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </Modal>
@@ -500,6 +582,31 @@ const AdminModal = ({ isOpen, onClose, user }) => {
                         <div className="flex justify-end space-x-3">
                             <button onClick={() => setItemToDelete(null)} className="px-4 py-2 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">Cancel</button>
                             <button onClick={confirmDelete} className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">Delete</button>
+                        </div>
+                    </div>
+                </Modal>
+            )}
+
+            {mergeConfirmation && (
+                <Modal isOpen={!!mergeConfirmation} onClose={() => setMergeConfirmation(null)}>
+                    <div className="p-6">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Confirm Merge</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 my-4">
+                            Are you sure you want to merge all entries from:
+                            <br />
+                            <strong className="font-mono text-red-600 dark:text-red-400">{mergeConfirmation.source}</strong>
+                            <br />
+                            into:
+                            <br />
+                            <strong className="font-mono text-green-600 dark:text-green-400">{mergeConfirmation.target}</strong>?
+                            <br /><br />
+                            The source user's data will be permanently deleted. This action cannot be undone.
+                        </p>
+                        <div className="flex justify-end space-x-3">
+                            <button onClick={() => setMergeConfirmation(null)} className="px-4 py-2 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">Cancel</button>
+                            <button onClick={handleConfirmMerge} disabled={isLoading} className="px-4 py-2 text-sm font-semibold text-white bg-orange-600 rounded-lg hover:bg-orange-700 disabled:bg-orange-400">
+                                {isLoading ? 'Merging...' : 'Confirm Merge'}
+                            </button>
                         </div>
                     </div>
                 </Modal>

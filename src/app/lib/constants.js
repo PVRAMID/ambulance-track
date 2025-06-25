@@ -1,5 +1,5 @@
 // src/app/lib/constants.js
-export const APP_VERSION = "v0.9.1-beta";
+export const APP_VERSION = "v0.9.2-beta";
 export const ENABLE_UPDATE_NOTIFICATION = false; // Toggle the update notification feature here
 export const DEV_LOGGING_ENABLED = true; // Toggle console logs for development
 export const MILEAGE_RATE = 0.45;
@@ -46,7 +46,8 @@ export const SHIFT_CLAIM_TYPES = {
     'Overtime Shift': { abbreviation: 'OT', color: '#400400' },
     'Essential Education': { abbreviation: 'EDU', color: '#5e0691' },
     'Time off in Lieu': { abbreviation: 'TOIL', color: '#085931' },
-    'Annual Leave': { abbreviation: 'A/L', color: '#0d8f4e' }
+    'Annual Leave': { abbreviation: 'A/L', color: '#0d8f4e' },
+    'Payback Shift': { abbreviation: 'PAYB', color: '#ca784e' }
 };
 
 export const PAY_BANDS = {

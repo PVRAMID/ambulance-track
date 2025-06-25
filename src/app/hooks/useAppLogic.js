@@ -33,7 +33,7 @@ function generateWordId() {
 }
 
 export function useAppLogic() {
-    const [userId] = usePersistentState('actracker_userId', generateWordId());
+    const [userId, setUserId] = usePersistentState('actracker_userId', generateWordId());
     const [entries, setEntries] = usePersistentState('ambulanceLogEntries_v6', {});
     const [settings, setSettings] = usePersistentState('ambulanceLogSettings_v6', {
         grade: '', band: '', step: '', division: '', station: '', userPostcode: '', customShiftTypes: { ...SHIFT_CLAIM_TYPES }
@@ -77,6 +77,25 @@ export function useAppLogic() {
 
     const [user, setUser] = useState(null);
     const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => {
+        // This effect runs once on mount to ensure user settings are up-to-date with the latest constants.
+        const masterShiftTypes = Object.keys(SHIFT_CLAIM_TYPES);
+        const userShiftTypes = settings.customShiftTypes ? Object.keys(settings.customShiftTypes) : [];
+        
+        const needsUpdate = masterShiftTypes.some(key => !userShiftTypes.includes(key));
+        
+        if (needsUpdate) {
+            const updatedSettings = {
+                ...settings,
+                customShiftTypes: {
+                    ...SHIFT_CLAIM_TYPES,
+                    ...(settings.customShiftTypes || {}),
+                }
+            };
+            setSettings(updatedSettings);
+        }
+    }, []); // Run only on initial mount
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -249,6 +268,7 @@ export function useAppLogic() {
         if (result.success) {
             setEntries(result.data.entries || {});
             setSettings(result.data.settings || {});
+            setUserId(code);
             alert('Recovery successful!');
             setIsRecoveryModalOpen(false);
         } else {

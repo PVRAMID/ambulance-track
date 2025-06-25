@@ -6,6 +6,16 @@ import { X } from 'lucide-react';
 
 const changelogData = [
     {
+        version: "v0.9.2-beta",
+        date: "2025-06-25",
+        changes: [
+            { type: "feat", text: "Added ability for sysops to merge user records." },
+            { type: "fix", text: "Adjusted recovery function, recovering a profile will now force the device to adopt that profiles user ID, preventing duplicate users in the database." },
+            { type: "feat", text: "Added Payback Shifts to shift types (Suggstion from Thomas H)" },
+            { type: "fix", text: "Application now checks user settings against codebase to check for new shift types (bug found during above feature implementation)" },
+        ]
+    },
+    {
         version: "v0.9.1-beta",
         date: "2025-06-23",
         changes: [
