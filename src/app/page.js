@@ -67,7 +67,8 @@ export default function Home() {
         handleToggleSync,
         handleRecoverData,
         handleDeleteServerData,
-        handleForceSync
+        handleForceSync,
+        handleForceUpdateFromServer,
     } = useAppLogic();
 
     const handleSendFeedback = async ({ feedbackType, details, name, screenshot }) => {
@@ -252,6 +253,7 @@ export default function Home() {
                         recoveryId={userId}
                         onRecover={handleRecoverData}
                         onDelete={handleDeleteServerData}
+                        onForceUpdateFromServer={handleForceUpdateFromServer}
                     />
 
                     <SyncConfirmationModal 

@@ -283,8 +283,21 @@ export function useAppLogic() {
         } else {
             alert(result.error);
         }
+        return result.success;
     };
     
+    const handleForceUpdateFromServer = async () => {
+        const result = await recoverData(userId);
+        if (result.success) {
+            setEntries(result.data.entries || {});
+            setSettings(result.data.settings || {});
+            alert('Successfully replaced local data with server data!');
+        } else {
+            alert(result.error);
+        }
+        return result.success;
+    };
+
     const handleCloseUpdateNotification = () => setShowUpdateNotification(false);
     const handleOpenNewEntryModal = (day) => { setSelectedDate(day); setEditingEntry(null); setIsEntryModalOpen(true); };
     const handleOpenEditEntryModal = (entry, dateString) => { setSelectedDate(new Date(dateString + 'T12:00:00')); setEditingEntry(entry); setIsEntryModalOpen(true); };
@@ -323,5 +336,6 @@ export function useAppLogic() {
         handleReplyToTicket: (ticketId, text) => addMessageToTicket(ticketId, userId, text),
         getMessagesForTicket,
         handleMarkTicketAsRead: (ticketId) => markTicketAsRead(ticketId, 'user'),
+        handleForceUpdateFromServer,
     };
 }
