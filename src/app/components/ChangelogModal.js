@@ -6,6 +6,13 @@ import { X } from 'lucide-react';
 
 const changelogData = [
     {
+        version: "v0.9.3-beta",
+        date: "2025-07-01",
+        changes: [
+            { type: "feat", text: "Added Sickness to Shift Types." },
+        ]
+    },
+    {
         version: "v0.9.2-beta",
         date: "2025-06-25",
         changes: [
