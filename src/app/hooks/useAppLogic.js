@@ -1,4 +1,3 @@
-// src/app/hooks/useAppLogic.js
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { usePersistentState } from './usePersistentState';
@@ -59,6 +58,7 @@ export function useAppLogic() {
     const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
     const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
     const [isTicketSystemModalOpen, setIsTicketSystemModalOpen] = useState(false);
+    const [isClaimAssistantModalOpen, setIsClaimAssistantModalOpen] = useState(false);
     
     const [showStorageWarning, setShowStorageWarning] = useState(false);
     const [showUpdateNotification, setShowUpdateNotification] = useState(false);
@@ -79,7 +79,6 @@ export function useAppLogic() {
     const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
-        // This effect runs on mount and whenever settings change to ensure user settings are up-to-date with the latest constants.
         const masterShiftTypes = Object.keys(SHIFT_CLAIM_TYPES);
         const userShiftTypes = settings.customShiftTypes ? Object.keys(settings.customShiftTypes) : [];
         
@@ -329,6 +328,7 @@ export function useAppLogic() {
             admin: { isOpen: isAdminModalOpen, open: () => setIsAdminModalOpen(true), close: () => setIsAdminModalOpen(false)},
             support: { isOpen: isSupportModalOpen, open: () => setIsSupportModalOpen(true), close: () => setIsSupportModalOpen(false) },
             ticketSystem: { isOpen: isTicketSystemModalOpen, open: () => setIsTicketSystemModalOpen(true), close: () => setIsTicketSystemModalOpen(false) },
+            claimAssistant: { isOpen: isClaimAssistantModalOpen, open: () => setIsClaimAssistantModalOpen(true), close: () => setIsClaimAssistantModalOpen(false) },
         },
         notifications: { storage: { isOpen: showStorageWarning, close: () => setShowStorageWarning(false) }, update: { isOpen: showUpdateNotification, close: handleCloseUpdateNotification, version: APP_VERSION },},
         setCurrentDate, setSidebarView, setTheme, setHasSeenWelcome, handleSaveEntry, handleSetEditingEntry, confirmDelete, handleSaveSettings, handleToggleSync, handleRecoverData, handleDeleteServerData, handleForceSync,

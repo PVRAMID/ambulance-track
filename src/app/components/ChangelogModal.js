@@ -6,6 +6,13 @@ import { X } from 'lucide-react';
 
 const changelogData = [
     {
+        version: "v0.9.4-beta",
+        date: "2025-07-25",
+        changes: [
+            { type: "feat", text: "Added Claim Assistant - A modal that appears with copy/mark submitted buttons allowing for easier tracking on what should be submitted for this current month." },
+        ]
+    },
+    {
         version: "v0.9.3-beta",
         date: "2025-07-01",
         changes: [

@@ -1,10 +1,9 @@
-// src/app/components/EntriesSidebar.js
 'use client';
 import React, { useMemo } from 'react';
 import { Clock, Info, Edit, AlarmClockOff } from 'lucide-react';
 import { SHIFT_CLAIM_TYPES } from '../lib/constants';
 
-const EntriesSidebar = ({ entries, onEdit, onShowBreakdown, onShowOvertimeBreakdown, view, setView, currentDate }) => {
+const EntriesSidebar = ({ entries, onEdit, onShowBreakdown, onShowOvertimeBreakdown, view, setView, currentDate, onOpenClaimAssistant }) => {
     const sortedEntries = useMemo(() => {
         const allEntries = Object.entries(entries)
             .flatMap(([date, dayEntries]) => dayEntries.map(entry => ({...entry, date})));
@@ -31,6 +30,13 @@ const EntriesSidebar = ({ entries, onEdit, onShowBreakdown, onShowOvertimeBreakd
                  <button onClick={() => setView('month')} className={`w-1/2 text-sm py-2 rounded-lg transition-all duration-300 ${view === 'month' ? 'bg-white dark:bg-gray-800 shadow-md text-gray-800 dark:text-gray-100 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>This Month</button>
                  <button onClick={() => setView('all')} className={`w-1/2 text-sm py-2 rounded-lg transition-all duration-300 ${view === 'all' ? 'bg-white dark:bg-gray-800 shadow-md text-gray-800 dark:text-gray-100 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>All Time</button>
             </div>
+
+            <button
+                onClick={onOpenClaimAssistant}
+                className="w-full mb-4 px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+                Claim Assistant
+            </button>
 
             <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-2 -mr-3">
                 {sortedEntries.length > 0 ? sortedEntries.map(entry => (

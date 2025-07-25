@@ -1,4 +1,3 @@
-// src/app/page.js
 'use client';
 
 import React from 'react';
@@ -21,7 +20,8 @@ import SyncConfirmationModal from './components/SyncConfirmationModal';
 import StorageWarning from './components/StorageWarning';
 import UpdateNotification from './components/UpdateNotification';
 import InformationModal from './components/InformationModal';
-import AdminModal from './components/AdminModal'; // Import AdminModal
+import AdminModal from './components/AdminModal';
+import ClaimAssistantModal from './components/ClaimAssistantModal';
 import Modal from './components/Modal';
 import ClientOnly from './components/ClientOnly';
 import AnnouncementsModal from './components/AnnouncementsModal';
@@ -35,6 +35,7 @@ export default function Home() {
         editingEntry,
         breakdownEntry,
         overtimeBreakdownEntry,
+        deleteRequest,
         entries,
         settings,
         theme,
@@ -219,6 +220,7 @@ export default function Home() {
                                    view={sidebarView} 
                                    setView={setSidebarView} 
                                    currentDate={currentDate} 
+                                   onOpenClaimAssistant={modals.claimAssistant.open}
                                 />
                             </div>
                         </aside>
@@ -328,8 +330,14 @@ export default function Home() {
                             isOpen={modals.info.isOpen}
                             onClose={modals.info.close}
                         />
+
+                    <ClaimAssistantModal
+                        isOpen={modals.claimAssistant.isOpen}
+                        onClose={modals.claimAssistant.close}
+                        entries={entries}
+                    />
                     
-                    <Modal isOpen={modals.delete.isOpen} onClose={modals.delete.close}>
+                    <Modal isOpen={!!deleteRequest} onClose={() => modals.delete.close()}>
                         <div className="p-6">
                             <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Confirm Deletion</h3>
                             <p className="text-sm text-gray-600 dark:text-gray-400 my-4">Are you sure you want to delete this entry? This action cannot be undone.</p>
