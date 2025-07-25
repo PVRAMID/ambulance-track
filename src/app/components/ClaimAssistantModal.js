@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useMemo } from 'react';
 import Modal from './Modal';
-import { X, Copy, CheckCircle, ChevronDown, Calendar, Tag, Radio, FileText } from 'lucide-react';
+import { X, Copy, CheckCircle, ChevronDown, Calendar, Tag, Radio, FileText, MapPin } from 'lucide-react';
 import { SHIFT_CLAIM_TYPES } from '../lib/constants';
 
 const ClaimAssistantModal = ({ isOpen, onClose, entries }) => {
@@ -61,12 +61,21 @@ Notes: ${entry.details || 'No notes.'}
                                         <div key={entry.id} className={`rounded-lg transition-all border ${isSubmitted ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800/30' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'}`}>
                                             <div className="p-3 flex items-center justify-between">
                                                 <div className={`flex-grow ${isSubmitted ? 'opacity-50' : ''}`}>
-                                                    <div className="flex items-center text-sm font-semibold text-gray-800 dark:text-gray-100">
-                                                        <Calendar className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" />
-                                                        <span className={isSubmitted ? 'line-through' : ''}>{new Date(entry.date + 'T12:00:00').toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
-                                                        <span className="mx-2 text-gray-300 dark:text-gray-600">|</span>
-                                                        <Tag className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" />
-                                                        <span className={isSubmitted ? 'line-through' : ''}>{entry.claimType}</span>
+                                                    <div className="flex items-center text-sm font-semibold text-gray-800 dark:text-gray-100 flex-wrap">
+                                                        <div className="flex items-center">
+                                                            <Calendar className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" />
+                                                            <span className={isSubmitted ? 'line-through' : ''}>{new Date(entry.date + 'T12:00:00').toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
+                                                            <span className="mx-2 text-gray-300 dark:text-gray-600">|</span>
+                                                            <Tag className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" />
+                                                            <span className={isSubmitted ? 'line-through' : ''}>{entry.claimType}</span>
+                                                        </div>
+                                                        {entry.claimType === 'Mileage' && entry.workingStation && (
+                                                            <div className="flex items-center ml-1">
+                                                                <span className="mx-2 text-gray-300 dark:text-gray-600">|</span>
+                                                                <MapPin className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" />
+                                                                <span className={isSubmitted ? 'line-through' : ''}>{entry.workingStation}</span>
+                                                            </div>
+                                                        )}
                                                         {claimValue && (
                                                             <span className={`ml-3 px-2 py-0.5 text-xs font-bold rounded-full ${isSubmitted ? 'text-green-800 bg-green-200 dark:bg-green-900/50 dark:text-green-300' : 'text-blue-900 bg-blue-200 dark:bg-blue-300 dark:text-blue-900'}`}>
                                                                 ~£{claimValue.toFixed(2)}
