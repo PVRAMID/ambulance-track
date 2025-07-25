@@ -53,10 +53,14 @@ const ClaimAssistantModal = ({ isOpen, onClose, entries }) => {
     };
 
     const copyToClipboard = (entry) => {
-        const entryDetails = `
-Callsign: ${entry.callsign || 'N/A'}
-Notes: ${entry.details || 'No notes.'}
-        `.trim();
+        const detailsToCopy = [];
+        if (entry.claimType === 'Mileage' && entry.workingStation) {
+            detailsToCopy.push(`Station: ${entry.workingStation}`);
+        }
+        detailsToCopy.push(`Callsign: ${entry.callsign || 'N/A'}`);
+        detailsToCopy.push(`Notes: ${entry.details || 'No notes.'}`);
+
+        const entryDetails = detailsToCopy.join('\n');
         navigator.clipboard.writeText(entryDetails);
     };
 
@@ -105,7 +109,7 @@ Notes: ${entry.details || 'No notes.'}
                                                 <div className="flex items-center space-x-1 flex-shrink-0 ml-4">
                                                     {isSubmitted && <CheckCircle className="w-5 h-5 text-green-500" />}
                                                     <button onClick={() => toggleSubmitted(entry.id)} className={`px-2 py-1 text-xs font-semibold rounded-md transition-colors ${isSubmitted ? 'bg-yellow-400 hover:bg-yellow-500 text-yellow-900' : 'bg-green-500 hover:bg-green-600 text-white'}`}>
-                                                        {isSubmitted ? 'Unmark Submitted' : 'Mark Submitted'}
+                                                        {isSubmitted ? 'Unmark' : 'Mark'}
                                                     </button>
                                                     <button onClick={() => copyToClipboard(entry)} className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 rounded-full">
                                                         <Copy className="w-4 h-4" />
