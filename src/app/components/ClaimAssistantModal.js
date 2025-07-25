@@ -1,12 +1,31 @@
 'use client';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Modal from './Modal';
 import { X, Copy, CheckCircle, ChevronDown, Calendar, Tag, Radio, FileText, MapPin } from 'lucide-react';
 import { SHIFT_CLAIM_TYPES } from '../lib/constants';
 
 const ClaimAssistantModal = ({ isOpen, onClose, entries }) => {
-    const [submittedClaims, setSubmittedClaims] = useState({});
+    const [submittedClaims, setSubmittedClaims] = useState(() => {
+        if (typeof window === 'undefined') {
+            return {};
+        }
+        try {
+            const savedClaims = window.localStorage.getItem('submittedClaims');
+            return savedClaims ? JSON.parse(savedClaims) : {};
+        } catch (error) {
+            console.error('Error reading submitted claims from localStorage', error);
+            return {};
+        }
+    });
     const [expandedRows, setExpandedRows] = useState({});
+
+    useEffect(() => {
+        try {
+            window.localStorage.setItem('submittedClaims', JSON.stringify(submittedClaims));
+        } catch (error) {
+            console.error('Error saving submitted claims to localStorage', error);
+        }
+    }, [submittedClaims]);
 
     const groupedEntries = useMemo(() => {
         const shiftTypes = Object.keys(SHIFT_CLAIM_TYPES);
@@ -86,7 +105,7 @@ Notes: ${entry.details || 'No notes.'}
                                                 <div className="flex items-center space-x-1 flex-shrink-0 ml-4">
                                                     {isSubmitted && <CheckCircle className="w-5 h-5 text-green-500" />}
                                                     <button onClick={() => toggleSubmitted(entry.id)} className={`px-2 py-1 text-xs font-semibold rounded-md transition-colors ${isSubmitted ? 'bg-yellow-400 hover:bg-yellow-500 text-yellow-900' : 'bg-green-500 hover:bg-green-600 text-white'}`}>
-                                                        {isSubmitted ? 'Unmark' : 'Mark'}
+                                                        {isSubmitted ? 'Unmark Submitted' : 'Mark Submitted'}
                                                     </button>
                                                     <button onClick={() => copyToClipboard(entry)} className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/60 rounded-full">
                                                         <Copy className="w-4 h-4" />

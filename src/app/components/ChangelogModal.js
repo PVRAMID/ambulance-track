@@ -6,6 +6,14 @@ import { X } from 'lucide-react';
 
 const changelogData = [
     {
+        version: "v0.9.5-beta",
+        date: "2025-07-25",
+        changes: [
+            { type: "ui", text: "Tweaked the Claim Assistant to look a little more beautiful, it was ugly. It now displays some more useful information." },
+            { type: "fix", text: "Claim Assistant Persistance - This fix now means marking something as submitted will persist through a page refresh, this currently will not show cross-devices, this may be implemented in the future." },
+        ]
+    },
+    {
         version: "v0.9.4-beta",
         date: "2025-07-25",
         changes: [
